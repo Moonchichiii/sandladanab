@@ -12,24 +12,29 @@
       content="Sandlådan AB utför grävmaskinsjobb på konsultbasis i Göteborg med omnejd. Snabb offert och punktlig leverans."
     />
     <link rel="stylesheet" href="{{ url_for('static', path='styles.css') }}" />
-    <!-- keep PNG favicons via /static (nice for modern browsers) -->
+    <link
+      rel="icon"
+      href="{{ url_for('static', path='assets/favicon.svg') }}"
+      type="image/svg+xml"
+    />
     <link
       rel="icon"
       type="image/png"
       sizes="32x32"
-      href="{{ url_for('static', path='favicon-32x32.png') }}"
+      href="{{ url_for('static', path='assets/favicon-32x32.png') }}"
     />
     <link
       rel="icon"
       type="image/png"
       sizes="16x16"
-      href="{{ url_for('static', path='favicon-16x16.png') }}"
+      href="{{ url_for('static', path='assets/favicon-16x16.png') }}"
+    />
+    <link
+      rel="icon"
+      href="{{ url_for('static', path='assets/favicon.ico') }}"
+      sizes="any"
     />
 
-    <!-- add a fallback that hits your explicit route -->
-    <link rel="icon" href="/favicon.ico" sizes="any" />
-
-    <!-- Nice-to-haves -->
     <meta name="theme-color" content="#0E1113" />
     <!-- matches your asphalt bg -->
     <meta name="application-name" content="Sandlådan AB" />
@@ -39,6 +44,7 @@
       src="{{ url_for('static', path='vendor/htmx.min.js') }}"
       defer
     ></script>
+    <script src="{{ url_for('static', path='file-input.js') }}" defer></script>
   </head>
   <body class="min-h-full">
     <a id="top" tabindex="-1"></a>

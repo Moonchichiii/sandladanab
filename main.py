@@ -395,3 +395,7 @@ def robots():
 @app.get("/favicon.ico")
 def favicon():
     return FileResponse(str(BASE_DIR / "static" / "favicon.ico"))
+
+@app.get("/site.webmanifest")
+def manifest():
+    return FileResponse(str(BASE_DIR / "static" / "site.webmanifest"), media_type="application/manifest+json")

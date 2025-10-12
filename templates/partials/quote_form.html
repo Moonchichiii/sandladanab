@@ -55,13 +55,18 @@
 
       <div>
         <label class="label" for="bild">Ladda upp bild (valfritt)</label>
-        <input
-          id="bild"
-          name="bild"
-          type="file"
-          accept="image/*"
-          class="file"
-        />
+
+        <div class="file-wrap">
+          <input
+            id="bild"
+            name="bild"
+            type="file"
+            accept="image/*"
+            class="file-visually-hidden"
+          />
+          <label for="bild" class="btn btn--ghost file-btn">Ladda upp</label>
+          <span class="file-name">Ingen fil vald</span>
+        </div>
       </div>
 
       <button type="submit" class="btn btn--primary">Skicka förfrågan</button>
