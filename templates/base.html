@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="sv" class="h-full">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>
+      {% block title %}Sandlådan AB – Grävmaskinsjobb på västkusten{% endblock
+      %}
+    </title>
+    <meta
+      name="description"
+      content="Sandlådan AB utför grävmaskinsjobb på konsultbasis i Göteborg med omnejd. Snabb offert och punktlig leverans."
+    />
+    <link rel="stylesheet" href="{{ url_for('static', path='styles.css') }}" />
+    <!-- keep PNG favicons via /static (nice for modern browsers) -->
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="{{ url_for('static', path='favicon-32x32.png') }}"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="{{ url_for('static', path='favicon-16x16.png') }}"
+    />
+
+    <!-- add a fallback that hits your explicit route -->
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+
+    <!-- Nice-to-haves -->
+    <meta name="theme-color" content="#0E1113" />
+    <!-- matches your asphalt bg -->
+    <meta name="application-name" content="Sandlådan AB" />
+    <meta name="apple-mobile-web-app-title" content="Sandlådan AB" />
+
+    <script
+      src="{{ url_for('static', path='vendor/htmx.min.js') }}"
+      defer
+    ></script>
+  </head>
+  <body class="min-h-full">
+    <a id="top" tabindex="-1"></a>
+    <a href="#main" class="sr-skip">Hoppa till innehåll</a>
+
+    {% include "partials/header.html" %} {% block hero %}{% endblock %}
+
+    <main id="main" class="container" style="padding: 3rem 0">
+      {% block content %}{% endblock %}
+    </main>
+
+    {% include "partials/footer.html" %}
+  </body>
+</html>

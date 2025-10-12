@@ -1,0 +1,26 @@
+fastapi>=0.111,<1.0
+uvicorn[standard]>=0.30,<0.31
+gunicorn>=21.2,<22
+jinja2>=3.1,<4.0
+python-multipart>=0.0.9,<0.0.10
+
+# HTTP-klient
+httpx[http2]>=0.27,<0.28
+
+# Bildpipeline
+Pillow>=10.3,<11.0
+pillow-avif-plugin>=1.4.6,<2.0
+
+# Kalender och datum
+python-dateutil>=2.9,<3.0
+icalendar>=5.0,<6.0
+
+# Cache (valfritt)
+redis>=5.0,<6.0
+
+# Stöd för StaticFiles mm
+aiofiles>=23.2,<24.0
+
+# FastAPI/Pydantic stack
+pydantic>=2.7,<3.0
+starlette>=0.37,<0.38

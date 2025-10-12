@@ -1,0 +1,72 @@
+<section id="offert" class="section" aria-labelledby="offert-titel">
+  <div class="container">
+    <h2 id="offert-titel">Begär offert</h2>
+    <p class="muted">Vi återkommer samma dag.</p>
+
+    <form
+      class="form"
+      hx-post="/offert"
+      hx-target="#offert-resultat"
+      hx-swap="innerHTML"
+      enctype="multipart/form-data"
+    >
+      <div class="hidden" aria-hidden="true" style="display: none">
+        <label for="website">Om du är människa, lämna tomt</label>
+        <input
+          id="website"
+          name="website"
+          type="text"
+          tabindex="-1"
+          autocomplete="off"
+        />
+      </div>
+
+      <div>
+        <label class="label" for="namn">Namn *</label>
+        <input id="namn" name="namn" required class="input" />
+      </div>
+
+      <div>
+        <label class="label" for="telefon">Telefon *</label>
+        <input
+          id="telefon"
+          name="telefon"
+          type="tel"
+          inputmode="tel"
+          required
+          class="input"
+        />
+      </div>
+
+      <div>
+        <label class="label" for="epost">E-post (valfritt)</label>
+        <input id="epost" name="epost" type="email" class="input" />
+      </div>
+
+      <div>
+        <label class="label" for="beskrivning">Kort beskrivning</label>
+        <textarea
+          id="beskrivning"
+          name="beskrivning"
+          rows="4"
+          class="textarea"
+        ></textarea>
+      </div>
+
+      <div>
+        <label class="label" for="bild">Ladda upp bild (valfritt)</label>
+        <input
+          id="bild"
+          name="bild"
+          type="file"
+          accept="image/*"
+          class="file"
+        />
+      </div>
+
+      <button type="submit" class="btn btn--primary">Skicka förfrågan</button>
+    </form>
+
+    <div id="offert-resultat" aria-live="polite" style="margin-top: 1rem"></div>
+  </div>
+</section>
