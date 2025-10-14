@@ -1,43 +1,36 @@
 <section id="galleri" class="section" aria-labelledby="galleri-titel">
   <div class="container">
-    <h2 id="galleri-titel">Våra projekt</h2>
-    <p class="muted" style="margin-bottom: 1rem">
+    <h2 id="galleri-titel">Galleri</h2>
+    <p class="muted">
       Se exempel på vårt arbete – från grundläggning till färdiga
       anläggningsprojekt på västkusten.
     </p>
 
-    {% set items = [ {"src": url_for('static',
-    path='assets/images/gallery-1.webp'), "alt": "Grundgrävning för
-    byggprojekt", "title": "Grundgrävning"}, {"src": url_for('static',
-    path='assets/images/gallery-2.webp'), "alt": "Landskapsarbete på
-    västkusten", "title": "Markplanering"}, {"src": url_for('static',
-    path='assets/images/gallery-3.webp'), "alt": "Ledningsarbete", "title":
-    "Ledningsförläggning"}, {"src": url_for('static',
-    path='assets/images/gallery-4.webp'), "alt": "Maskinarbete på
-    byggarbetsplats", "title": "Masslastning"}, {"src": url_for('static',
-    path='assets/images/gallery-5.webp'), "alt": "Färdigställt markarbete",
-    "title": "Färdigställt projekt"}, {"src": url_for('static',
-    path='assets/images/gallery-6.webp'), "alt": "Grävmaskin vid solnedgång",
-    "title": "Professionellt arbete"} ] %}
+    {% set gallery_items = [ {"name": "Grundgrävning", "sizes": "1"}, {"name":
+    "Markplanering", "sizes": "2"}, {"name": "Dräneringsjobb", "sizes": "3"},
+    {"name": "Ledningsförläggning", "sizes": "4"}, {"name": "Schaktarbete",
+    "sizes": "5"}, {"name": "Färdigställt projekt", "sizes": "6"} ] %}
 
-    <ul class="gallery">
-      {% for it in items %}
+    <ul class="gallery" role="list">
+      {% for item in gallery_items %}
       <li class="gallery__item">
         <figure class="gallery__figure">
           <img
+            class="gallery__img"
             srcset="
-    {{ it.src | replace('.webp','-320.webp') }} 320w,
-    {{ it.src | replace('.webp','-480.webp') }} 480w,
-    {{ it.src | replace('.webp','-640.webp') }} 640w,
-    {{ it.src | replace('.webp','-768.webp') }} 768w"
+              {{ url_for('static', path='assets/images/gallery-' ~ item.sizes ~ '-320.webp') }} 320w,
+              {{ url_for('static', path='assets/images/gallery-' ~ item.sizes ~ '-480.webp') }} 480w,
+              {{ url_for('static', path='assets/images/gallery-' ~ item.sizes ~ '-640.webp') }} 640w,
+              {{ url_for('static', path='assets/images/gallery-' ~ item.sizes ~ '-768.webp') }} 768w"
             sizes="(min-width: 64rem) 25vw, (min-width: 48rem) 33vw, 50vw"
-            src="{{ it.src | replace('.webp','-320.webp') }}"
+            src="{{ url_for('static', path='assets/images/gallery-' ~ item.sizes ~ '.webp') }}"
+            alt="{{ item.name }} – Sandlådan AB grävmaskinsjobb"
+            width="768"
+            height="768"
+            loading="lazy"
+            decoding="async"
           />
-          alt="{{ it.alt }}" width="768" height="768" loading="lazy"
-          decoding="async" fetchpriority="low"
-          <!-- add -->
-          class="gallery__img" />
-          <figcaption class="gallery__caption">{{ it.title }}</figcaption>
+          <figcaption class="gallery__caption">{{ item.name }}</figcaption>
         </figure>
       </li>
       {% endfor %}
