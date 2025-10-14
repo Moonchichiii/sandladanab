@@ -1,5 +1,48 @@
-<footer class="footer">
-  <div class="container muted" style="font-size: 0.9rem">
-    © {{ current_year|default(2025) }} Sandlådan AB – Göteborg med omnejd
+<footer class="footer" aria-labelledby="sidfotsinfo">
+  <div class="container">
+    <div class="footer__grid">
+      <section>
+        <h3 id="sidfotsinfo" class="footer__h">Sandlådan AB</h3>
+        <p class="muted">
+          Professionella grävmaskinsjobb och anläggningsarbeten på västkusten.
+        </p>
+        <p class="muted">Göteborg med omnejd</p>
+      </section>
+
+      <nav aria-label="Snabblänkar">
+        <h3 class="footer__h">Snabblänkar</h3>
+        <ul class="footer__links">
+          <li><a href="#tjanster" class="link-underline">Våra tjänster</a></li>
+          <li><a href="#galleri" class="link-underline">Galleri</a></li>
+          <li><a href="#offert" class="link-underline">Begär offert</a></li>
+        </ul>
+      </nav>
+
+      <section aria-labelledby="kontakt">
+        <h3 id="kontakt" class="footer__h">Kontakt</h3>
+        <ul class="footer__links">
+          <li>
+            <a href="tel:{{ owner_phone }}" class="link-underline"
+              >Telefon: {{ owner_phone }}</a
+            >
+          </li>
+          <li>
+            <a
+              href="mailto:{{ mail_from|default('info@sandladan.se') }}"
+              class="link-underline"
+            >
+              {{ mail_from|default('info@sandladan.se') }}</a
+            >
+          </li>
+        </ul>
+      </section>
+    </div>
+
+    <div class="footer__bar">
+      <p class="muted">
+        © {{ current_year|default(2025) }} Sandlådan AB – Alla rättigheter
+        förbehållna
+      </p>
+    </div>
   </div>
 </footer>

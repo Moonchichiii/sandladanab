@@ -1,2 +1,2 @@
 # sandladanab
-Lightweight project within the construction section.
+Lightweight project within the construction industry.

@@ -1,47 +1,41 @@
 from __future__ import annotations
-from starlette.middleware.gzip import GZipMiddleware
-from fastapi import FastAPI, Request, Form, UploadFile, File, status, BackgroundTasks
+
+import os
+import pathlib
+import smtplib
+import ssl
+import time
+from datetime import datetime, timedelta
+from email.message import EmailMessage
+from typing import Optional
+
+import httpx
+from icalendar import Calendar
+from dateutil import tz
+from fastapi import BackgroundTasks, FastAPI, File, Form, Request, UploadFile, status
 from fastapi.responses import HTMLResponse, PlainTextResponse, FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.cors import CORSMiddleware
+from starlette.middleware.gzip import GZipMiddleware
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
-from typing import Optional
-import os
-import time
-import pathlib
-import smtplib
-import ssl
-from email.message import EmailMessage
-
-# NEW: calendar / time deps
-import httpx
-from icalendar import Calendar
-from dateutil import tz
-from datetime import datetime, timedelta
-
-# --------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 # App
-# --------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 app = FastAPI(title="Sandlådan AB")
-
 BASE_DIR = pathlib.Path(__file__).parent
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
 
-# --------------------------------------------------------------------------------------
-# Env & security config
-# --------------------------------------------------------------------------------------
-# Domains
-ALLOWED_HOSTS = [
-    h.strip()
-    for h in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
-    if h.strip()
-]
+# ---------------------------------------------------------------------------
+# Env & security
+# ---------------------------------------------------------------------------
+ALLOWED_HOSTS = [h.strip() for h in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",") if h.strip()]
 BASE_URL = os.getenv("BASE_URL", "").strip()
+templates.env.globals.update(BASE_URL=BASE_URL)
 
-# CORS (only needed if you call the API from another origin; otherwise keep tight)
+# CORS: only if you call API from another origin
 CORS_ORIGINS = [BASE_URL] if BASE_URL else ["http://localhost", "http://127.0.0.1"]
 app.add_middleware(
     CORSMiddleware,
@@ -50,11 +44,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Trusted hosts (protect Host header)
+
 if ALLOWED_HOSTS:
     app.add_middleware(TrustedHostMiddleware, allowed_hosts=ALLOWED_HOSTS)
 
-# Security headers (HSTS toggle via env)
 HSTS_ENABLE = os.getenv("HSTS_ENABLE", "false").lower() == "true"
 SEC_HEADERS = {
     "Content-Security-Policy": (
@@ -74,24 +67,20 @@ SEC_HEADERS = {
     "Permissions-Policy": "geolocation=(), microphone=(), camera=()",
 }
 if HSTS_ENABLE:
-    SEC_HEADERS["Strict-Transport-Security"] = (
-        "max-age=31536000; includeSubDomains; preload"
-    )
+    SEC_HEADERS["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains; preload"
 
 
 @app.middleware("http")
 async def _security_headers(request: Request, call_next):
     resp: Response = await call_next(request)
     for k, v in SEC_HEADERS.items():
-        # don't overwrite if already set
         if k not in resp.headers:
             resp.headers[k] = v
     return resp
 
-
-# --------------------------------------------------------------------------------------
-# SMTP / mail
-# --------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# Mail
+# ---------------------------------------------------------------------------
 SMTP_HOST = os.environ.get("SMTP_HOST", "")
 SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
 SMTP_USER = os.environ.get("SMTP_USER", "")
@@ -101,7 +90,7 @@ MAIL_FROM = os.environ.get("MAIL_FROM", SMTP_USER or "no-reply@sandladan.se")
 MAIL_TO = os.environ.get("MAIL_TO", "")
 OWNER_PHONE = os.environ.get("OWNER_PHONE", "+46XXXXXXXX")
 
-# Rate limit
+# Rate limit (simple in-memory token bucket)
 RATE_BUCKET: dict[str, list[float]] = {}
 RATE_WINDOW = int(os.getenv("RATE_WINDOW", "60"))
 RATE_MAX = int(os.getenv("RATE_MAX", "5"))
@@ -152,10 +141,9 @@ def send_email_message(msg: EmailMessage):
                 server.login(SMTP_USER, SMTP_PASS)
             server.send_message(msg)
 
-
-# --------------------------------------------------------------------------------------
-# Calendar-driven availability
-# --------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# Availability (ICS)
+# ---------------------------------------------------------------------------
 LEDIGA_TEXT = os.getenv(
     "LEDIGA_TEXT",
     "Lediga v. 42–43 • Snabbt platsbesök i Göteborg med omnejd",
@@ -186,9 +174,7 @@ async def availability_text_from_ics() -> str:
         end = datetime.now(tzinfo) + timedelta(weeks=AVAILABILITY_WEEKS_AHEAD)
 
         async with httpx.AsyncClient(timeout=4.0, http2=True) as client:
-            r = await client.get(
-                CALENDAR_ICS_URL, headers={"User-Agent": "sandladan/1.0"}
-            )
+            r = await client.get(CALENDAR_ICS_URL, headers={"User-Agent": "sandladan/1.0"})
             r.raise_for_status()
             cal = Calendar.from_ical(r.content)
 
@@ -199,16 +185,8 @@ async def availability_text_from_ics() -> str:
             if not dtstart:
                 continue
 
-            s = (
-                getattr(dtstart.dt, "astimezone", lambda _: dtstart.dt)(tzinfo)
-                if hasattr(dtstart, "dt")
-                else None
-            )
-            e = (
-                getattr(dtend.dt, "astimezone", lambda _: dtend.dt)(tzinfo)
-                if hasattr(dtend, "dt")
-                else s
-            )
+            s = getattr(dtstart.dt, "astimezone", lambda _: dtstart.dt)(tzinfo) if hasattr(dtstart, "dt") else None
+            e = getattr(dtend.dt, "astimezone", lambda _: dtend.dt)(tzinfo) if hasattr(dtend, "dt") else s
             if not s:
                 continue
             if s > end:
@@ -244,52 +222,34 @@ async def availability_text_from_ics() -> str:
 async def availability_text() -> str:
     if CALENDAR_MODE == "ics":
         return await availability_text_from_ics()
-    # elif CALENDAR_MODE == "google":
-    #     # Implement service-account freebusy/events listing here when ready.
+    # elif CALENDAR_MODE == "google":  # implement later if needed
     return LEDIGA_TEXT
 
-
-# gzip responses for bigger payloads (>500B)
+# Compression for larger payloads
 app.add_middleware(GZipMiddleware, minimum_size=500)
 
-
-# small helper to set long cache headers for /static/*
+# Long cache for /static/*
 @app.middleware("http")
 async def _static_cache_control(request: Request, call_next):
     resp: Response = await call_next(request)
     if request.url.path.startswith("/static/"):
-        # 1 year immutable cache for hashed assets/images
         resp.headers.setdefault("Cache-Control", "public, max-age=31536000, immutable")
     return resp
 
-
-# --------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 # Routes
-# --------------------------------------------------------------------------------------
-@app.get("/", response_class=HTMLResponse)
-async def index(request: Request):
-    return templates.TemplateResponse(
-        "index.html",
-        {
-            "request": request,
-            "current_year": time.gmtime().tm_year,
-            "owner_phone": OWNER_PHONE,
-        },
-    )
-
-
+# ---------------------------------------------------------------------------
 @app.get("/status", response_class=HTMLResponse)
 async def status_snippet():
     text = await availability_text()
     html = (
         f'<span class="inline-flex items-center gap-2">'
-        f'<span class="w-2 h-2 rounded-full bg-green-500 animate-pulse" aria-hidden="true"></span>'
+        f'<span class="w-2 h-2 rounded-full" style="background:#22c55e" aria-hidden="true"></span>'
         f'<span class="font-medium">Tillgänglighet:</span>'
-        f"<span>{text}</span>"
+        f'<span>{text}</span>'
         f"</span>"
     )
     return HTMLResponse(html)
-
 
 @app.post("/offert", response_class=HTMLResponse)
 async def offert(
@@ -306,9 +266,9 @@ async def offert(
     if too_many_requests(ip):
         return HTMLResponse(
             """
-            <div class="rounded-lg border border-red-500/40 bg-red-500/10 p-4">
+            <div class="notice notice--err">
               <p class="font-semibold">För många förfrågningar just nu.</p>
-              <p class="text-sm opacity-80">Vänta en liten stund och försök igen.</p>
+              <p class="text-sm notice__muted">Vänta en liten stund och försök igen.</p>
             </div>
             """,
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
@@ -318,11 +278,11 @@ async def offert(
     if website:
         return HTMLResponse(
             """
-            <div class="rounded-lg border border-green-500/40 bg-green-500/10 p-4">
+            <div class="notice notice--ok">
               <p class="font-semibold">Tack! Din förfrågan är mottagen.</p>
-              <p class="text-sm opacity-80">Vi återkommer samma dag.</p>
+              <p class="text-sm notice__muted">Vi återkommer samma dag.</p>
             </div>
-            """,
+            """
         )
 
     errors = []
@@ -332,20 +292,15 @@ async def offert(
         errors.append("Ange ditt telefonnummer.")
     if errors:
         lis = "".join(f"<li>{e}</li>" for e in errors)
-        return HTMLResponse(
-            f"""
-            <div class="rounded-lg border border-red-500/40 bg-red-500/10 p-4">
+        return HTMLResponse(f"""
+            <div class="notice notice--err">
               <p class="font-semibold">Kunde inte skicka – kontrollera följande:</p>
-              <ul class="list-disc pl-5 mt-2">{lis}</ul>
+              <ul class="list-disc notice__list">{lis}</ul>
             </div>
-            """,
-            status_code=status.HTTP_400_BAD_REQUEST,
-        )
+            """, status_code=status.HTTP_400_BAD_REQUEST)
 
     def esc(s: Optional[str]) -> str:
-        if s:
-            return s.replace("<", "&lt;").replace(">", "&gt;")
-        return ""
+        return s.replace("<", "&lt;").replace(">", "&gt;") if s else ""
 
     subject = f"[Sandlådan AB] Ny förfrågan från {esc(namn)}"
     body_html = f"""
@@ -370,32 +325,36 @@ async def offert(
     msg = build_email(subject, body_html, body_text, attachments)
     background.add_task(send_email_message, msg)
 
-    return HTMLResponse(
-        f"""
-        <div class="rounded-lg border border-green-500/40 bg-green-500/10 p-4">
+    return HTMLResponse(f"""
+        <div class="notice notice--ok">
           <p class="font-semibold">Tack {esc(namn)}! Din förfrågan är mottagen.</p>
-          <p class="text-sm opacity-80">Vi återkommer samma dag på {esc(telefon)}.</p>
+          <p class="text-sm notice__muted">Vi återkommer samma dag på {esc(telefon)}.</p>
         </div>
-        """
+        """)
+
+
+@app.get("/", response_class=HTMLResponse)
+async def index(request: Request):
+    return templates.TemplateResponse(
+        "index.html",
+        {
+            "request": request,
+            "current_year": time.gmtime().tm_year,
+            "owner_phone": OWNER_PHONE,
+            "mail_from": MAIL_FROM or "info@sandladan.se",
+        },
     )
 
 
 ROBOT_PATH = BASE_DIR / "robots.txt"
 
-
 @app.get("/robots.txt")
 def robots():
     if ROBOT_PATH.exists():
-        return FileResponse(
-            path=str(ROBOT_PATH), media_type="text/plain; charset=utf-8"
-        )
+        return FileResponse(path=str(ROBOT_PATH), media_type="text/plain; charset=utf-8")
     return PlainTextResponse("User-agent: *\nAllow: /\n")
 
-
-@app.get("/favicon.ico")
-def favicon():
-    return FileResponse(str(BASE_DIR / "static" / "favicon.ico"))
-
+# Legacy paths some browsers hit automatically
 @app.get("/site.webmanifest")
 def manifest():
     return FileResponse(str(BASE_DIR / "static" / "site.webmanifest"), media_type="application/manifest+json")

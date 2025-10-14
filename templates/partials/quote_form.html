@@ -5,12 +5,15 @@
 
     <form
       class="form"
+      action="/offert"
+      method="post"
       hx-post="/offert"
       hx-target="#offert-resultat"
       hx-swap="innerHTML"
       enctype="multipart/form-data"
     >
-      <div class="hidden" aria-hidden="true" style="display: none">
+      <!-- Honeypot -->
+      <div class="visually-hidden" aria-hidden="true">
         <label for="website">Om du är människa, lämna tomt</label>
         <input
           id="website"
@@ -23,7 +26,13 @@
 
       <div>
         <label class="label" for="namn">Namn *</label>
-        <input id="namn" name="namn" required class="input" />
+        <input
+          id="namn"
+          name="namn"
+          required
+          class="input"
+          autocomplete="name"
+        />
       </div>
 
       <div>
@@ -35,12 +44,19 @@
           inputmode="tel"
           required
           class="input"
+          autocomplete="tel"
         />
       </div>
 
       <div>
         <label class="label" for="epost">E-post (valfritt)</label>
-        <input id="epost" name="epost" type="email" class="input" />
+        <input
+          id="epost"
+          name="epost"
+          type="email"
+          class="input"
+          autocomplete="email"
+        />
       </div>
 
       <div>
@@ -55,14 +71,13 @@
 
       <div>
         <label class="label" for="bild">Ladda upp bild (valfritt)</label>
-
         <div class="file-wrap">
           <input
             id="bild"
             name="bild"
             type="file"
             accept="image/*"
-            class="file-visually-hidden"
+            class="visually-hidden"
           />
           <label for="bild" class="btn btn--ghost file-btn">Ladda upp</label>
           <span class="file-name">Ingen fil vald</span>
@@ -72,6 +87,7 @@
       <button type="submit" class="btn btn--primary">Skicka förfrågan</button>
     </form>
 
-    <div id="offert-resultat" aria-live="polite" style="margin-top: 1rem"></div>
+    <!-- Sibling target for HTMX responses -->
+    <div id="offert-resultat" aria-live="polite" role="status"></div>
   </div>
 </section>

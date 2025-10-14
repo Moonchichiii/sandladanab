@@ -1,13 +1,20 @@
 <section class="hero">
   <img
     class="hero__bg"
-    src="{{ url_for('static', path='assets/images/hero-excavator.webp') }}"
+    srcset="
+      {{ url_for('static', path='assets/images/hero-excavator-640.webp') }} 640w,
+      {{ url_for('static', path='assets/images/hero-excavator-1280.webp') }} 1280w,
+      {{ url_for('static', path='assets/images/hero-excavator-1920.webp') }} 1920w"
+    sizes="100vw"
+    src="{{ url_for('static', path='assets/images/hero-excavator-1280.webp') }}"
     alt=""
     width="1920"
     height="1080"
     loading="eager"
     fetchpriority="high"
+    decoding="async"
   />
+
   <div class="hero__overlay"></div>
 
   <div class="container hero__content">

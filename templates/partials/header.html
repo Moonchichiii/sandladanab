@@ -2,13 +2,18 @@
   <div class="container header__row">
     <a href="#top" class="brand" aria-label="Till toppen – Sandlådan AB">
       <span class="brand__bar" aria-hidden="true"></span>
-      <span>Sandlådan AB</span>
-      <span aria-hidden="true" class="meta" style="margin-left: 0.5rem">/</span>
-      <span class="meta" style="margin-left: 0.5rem">Göteborg med omnejd</span>
+      <span class="brand__name">Sandlådan AB</span>
+      <span class="brand__sep meta" aria-hidden="true">/</span>
+      <span class="brand__loc meta">Göteborg med omnejd</span>
     </a>
-    <nav aria-label="Huvudnavigering" style="display: flex; gap: 0.5rem">
-      <a href="tel:{{ owner_phone }}" class="btn btn--primary">Ring oss</a>
-      <a href="#offert" class="btn btn--ghost">Begär offert</a>
+
+    <nav class="header__nav" aria-label="Huvudnavigering">
+      <a href="#tjanster" class="link-underline">Tjänster</a>
+      <a href="#galleri" class="link-underline">Galleri</a>
+      <a href="#offert" class="link-underline">Begär offert</a>
+      <a href="tel:{{ owner_phone }}" class="btn btn--primary header__cta"
+        >Ring oss</a
+      >
     </nav>
   </div>
 </header>
