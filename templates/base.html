@@ -28,22 +28,25 @@
       rel="preload"
       as="image"
       type="image/webp"
-      imagesrcset=" /static/assets/images/hero-excavator-640.webp 640w, /static/assets/images/hero-excavator-1280.webp 1280w, /static/assets/images/hero-excavator-1920.webp 1920w"
+      imagesrcset="
+    {{ url_for('static', path='assets/images/hero-excavator-640.webp') }} 640w,
+    {{ url_for('static', path='assets/images/hero-excavator-1280.webp') }} 1280w,
+    {{ url_for('static', path='assets/images/hero-excavator-1920.webp') }} 1920w"
       imagesizes="100vw"
-      href="/static/assets/images/hero-excavator-1280.webp"
+      href="{{ url_for('static', path='assets/images/hero-excavator-1280.webp') }}"
       fetchpriority="high"
     />
 
     <link
       rel="preload"
-      href="/static/assets/fonts/satoshi/Satoshi-Variable.woff2"
+      href="/static/assets/fonts/Satoshi-Variable.woff2"
       as="font"
       type="font/woff2"
       crossorigin
     />
     <link
       rel="preload"
-      href="/static/assets/fonts/author/Author-Variable.woff2"
+      href="/static/assets/fonts/Author-Variable.woff2"
       as="font"
       type="font/woff2"
       crossorigin
@@ -74,21 +77,29 @@
       }
       @font-face {
         font-family: "Satoshi";
-        src: url("/static/assets/fonts/satoshi/Satoshi-Variable.woff2")
-          format("woff2");
+        src: url("/static/assets/fonts/Satoshi-Variable.woff2") format("woff2");
         font-weight: 300 900;
         font-style: normal;
         font-display: swap;
-        unicode-range: U+000-5FF;
+
+        /* tweak values after eyeballing in devtools */
+        size-adjust: 102%;
+        ascent-override: 92%;
+        descent-override: 22%;
+        line-gap-override: 0%;
       }
 
       @font-face {
         font-family: "Author";
-        src: url("/static/assets/fonts/author/Author-Variable.woff2")
-          format("woff2");
+        src: url("/static/assets/fonts/Author-Variable.woff2") format("woff2");
         font-weight: 300 900;
         font-style: normal;
         font-display: swap;
+
+        size-adjust: 98%;
+        ascent-override: 95%;
+        descent-override: 22%;
+        line-gap-override: 0%;
       }
 
       /* Base */
