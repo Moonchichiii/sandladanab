@@ -524,6 +524,7 @@
         padding: 4rem 0;
       }
       .cards {
+        list-style: none;
         display: grid;
         gap: 1rem;
         margin-top: 1.25rem;
@@ -776,48 +777,76 @@
       }
 
       /* Footer */
-      .footer .container {
-        font-size: 0.9rem;
+      /* Footer */
+      .footer {
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.02);
       }
+
+      .footer .container {
+        font-size: 0.95rem;
+      }
+
       .footer__grid {
         display: grid;
-        gap: 1.25rem;
-        padding: 2rem 0 1rem;
+        gap: 1.5rem;
+        padding: 2.25rem 0 1.25rem;
         grid-template-columns: 1fr;
       }
+
       @media (min-width: 48rem) {
         .footer__grid {
           grid-template-columns: repeat(3, 1fr);
+          align-items: start;
         }
       }
+
+      .footer__h {
+        font-weight: 800;
+        margin: 0 0 0.5rem;
+      }
+
+      .footer__links {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        gap: 0.5rem;
+      }
+
+      .footer__links li {
+        margin: 0;
+        padding: 0;
+      }
+
+      .footer__links a {
+        display: inline-block;
+        max-width: 100%;
+        word-break: break-word;
+      }
+
+      .footer__bar {
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 1rem 0 1.25rem;
+        text-align: center;
+      }
+
+      .footer__bar p {
+        margin: 0;
+      }
+
+      .footer__bar p + p {
+        margin-top: 0.5rem;
+      }
+
+      /* Mobile: center everything nicely */
       @media (max-width: 48rem) {
         .footer__grid {
           text-align: center;
         }
         .footer__links {
-          align-items: center;
+          justify-items: center;
         }
-        .footer__bar {
-          text-align: center;
-        }
-      }
-      .footer__h {
-        font-weight: 800;
-        margin-bottom: 0.5rem;
-      }
-      .footer__links {
-        display: flex;
-        flex-direction: column;
-        gap: 0.4rem;
-        margin: 0;
-        padding: 0;
-        list-style: none;
-      }
-      .footer__bar {
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
-        padding-top: 1rem;
-        padding-bottom: 1rem;
-        text-align: center;
       }
 
       /* Motion & focus */
@@ -971,10 +1000,11 @@
       class="nav-mobile"
       aria-hidden="true"
       aria-label="Mobilmeny"
+      inert
     >
-      <a href="#tjanster" onclick="closeMenu()">Tjänster</a>
-      <a href="#galleri" onclick="closeMenu()">Galleri</a>
-      <a href="#offert" onclick="closeMenu()">Begär Offert</a>
+      <a href="#tjanster">Tjänster</a>
+      <a href="#galleri">Galleri</a>
+      <a href="#offert">Begär Offert</a>
       <a
         href="tel:{{ owner_phone }}"
         class="btn btn--primary header__cta btn--icon"

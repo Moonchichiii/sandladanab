@@ -1,11 +1,11 @@
-<section
-  id="offert"
-  class="section"
-  style="background: rgba(255, 255, 255, 0.02)"
->
+<section id="offert" class="section">
   <div class="container" style="max-width: 42rem">
     <div class="text-center" style="margin-bottom: 2rem">
-      <h2>Begär Offert</h2>
+      <h2
+        style="font-weight: 800; font-size: 2.25rem; letter-spacing: -0.025em"
+      >
+        Begär Offert
+      </h2>
       <p>Beskriv ditt projekt så återkommer vi oftast samma dag.</p>
     </div>
 
@@ -19,13 +19,16 @@
       enctype="multipart/form-data"
     >
       <!-- Honeypot -->
-      <input
-        type="text"
-        name="website"
-        class="visually-hidden"
-        tabindex="-1"
-        autocomplete="off"
-      />
+      <div class="visually-hidden" aria-hidden="true">
+        <label for="website">Lämna detta fält tomt</label>
+        <input
+          id="website"
+          type="text"
+          name="website"
+          tabindex="-1"
+          autocomplete="off"
+        />
+      </div>
 
       <div>
         <label class="form-label" for="namn">Namn *</label>
@@ -35,6 +38,7 @@
           name="namn"
           required
           autocomplete="name"
+          placeholder="Ditt för- och efternamn"
         />
       </div>
 
@@ -47,6 +51,8 @@
           type="tel"
           required
           autocomplete="tel"
+          inputmode="tel"
+          placeholder="070 - 123 45 67"
         />
       </div>
 
@@ -59,6 +65,7 @@
           id="beskrivning"
           name="beskrivning"
           rows="4"
+          placeholder="Kort om projektet (t.ex. grävning för pool, dränering...)"
         ></textarea>
       </div>
 
@@ -77,6 +84,7 @@
         Skicka förfrågan
       </button>
     </form>
+
     <p class="help" style="margin-top: 0.75rem; text-align: center">
       Genom att skicka formuläret godkänner du att vi behandlar dina uppgifter
       för att kunna återkomma med offert. Inga uppgifter används i

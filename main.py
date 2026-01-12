@@ -31,7 +31,11 @@ app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="stat
 # ---------------------------------------------------------------------------
 # Env & security
 # ---------------------------------------------------------------------------
-ALLOWED_HOSTS = [h.strip() for h in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",") if h.strip()]
+ALLOWED_HOSTS = [
+    h.strip()
+    for h in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+    if h.strip()
+]
 BASE_URL = os.getenv("BASE_URL", "").strip()
 templates.env.globals.update(BASE_URL=BASE_URL)
 
@@ -67,7 +71,9 @@ SEC_HEADERS = {
     "Permissions-Policy": "geolocation=(), microphone=(), camera=()",
 }
 if HSTS_ENABLE:
-    SEC_HEADERS["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains; preload"
+    SEC_HEADERS["Strict-Transport-Security"] = (
+        "max-age=31536000; includeSubDomains; preload"
+    )
 
 
 @app.middleware("http")
@@ -77,6 +83,7 @@ async def _security_headers(request: Request, call_next):
         if k not in resp.headers:
             resp.headers[k] = v
     return resp
+
 
 # ---------------------------------------------------------------------------
 # Mail
@@ -89,6 +96,7 @@ SMTP_STARTTLS = os.environ.get("SMTP_STARTTLS", "true").lower() == "true"
 MAIL_FROM = os.environ.get("MAIL_FROM", SMTP_USER or "no-reply@sandladan.se")
 MAIL_TO = os.environ.get("MAIL_TO", "")
 OWNER_PHONE = os.environ.get("OWNER_PHONE", "+46XXXXXXXX")
+PUBLIC_EMAIL = os.environ.get("PUBLIC_EMAIL", "info@sandladan.se")
 
 # Rate limit (simple in-memory token bucket)
 RATE_BUCKET: dict[str, list[float]] = {}
@@ -141,6 +149,7 @@ def send_email_message(msg: EmailMessage):
                 server.login(SMTP_USER, SMTP_PASS)
             server.send_message(msg)
 
+
 # ---------------------------------------------------------------------------
 # Availability (ICS)
 # ---------------------------------------------------------------------------
@@ -174,7 +183,9 @@ async def availability_text_from_ics() -> str:
         end = datetime.now(tzinfo) + timedelta(weeks=AVAILABILITY_WEEKS_AHEAD)
 
         async with httpx.AsyncClient(timeout=4.0, http2=True) as client:
-            r = await client.get(CALENDAR_ICS_URL, headers={"User-Agent": "sandladan/1.0"})
+            r = await client.get(
+                CALENDAR_ICS_URL, headers={"User-Agent": "sandladan/1.0"}
+            )
             r.raise_for_status()
             cal = Calendar.from_ical(r.content)
 
@@ -185,8 +196,16 @@ async def availability_text_from_ics() -> str:
             if not dtstart:
                 continue
 
-            s = getattr(dtstart.dt, "astimezone", lambda _: dtstart.dt)(tzinfo) if hasattr(dtstart, "dt") else None
-            e = getattr(dtend.dt, "astimezone", lambda _: dtend.dt)(tzinfo) if hasattr(dtend, "dt") else s
+            s = (
+                getattr(dtstart.dt, "astimezone", lambda _: dtstart.dt)(tzinfo)
+                if hasattr(dtstart, "dt")
+                else None
+            )
+            e = (
+                getattr(dtend.dt, "astimezone", lambda _: dtend.dt)(tzinfo)
+                if hasattr(dtend, "dt")
+                else s
+            )
             if not s:
                 continue
             if s > end:
@@ -225,8 +244,10 @@ async def availability_text() -> str:
     # elif CALENDAR_MODE == "google":  # implement later if needed
     return LEDIGA_TEXT
 
+
 # Compression for larger payloads
 app.add_middleware(GZipMiddleware, minimum_size=500)
+
 
 # Long cache for /static/*
 @app.middleware("http")
@@ -235,6 +256,7 @@ async def _static_cache_control(request: Request, call_next):
     if request.url.path.startswith("/static/"):
         resp.headers.setdefault("Cache-Control", "public, max-age=31536000, immutable")
     return resp
+
 
 # ---------------------------------------------------------------------------
 # Routes
@@ -246,10 +268,11 @@ async def status_snippet():
         f'<span class="inline-flex items-center gap-2">'
         f'<span class="w-2 h-2 rounded-full" style="background:#22c55e" aria-hidden="true"></span>'
         f'<span class="font-medium">Tillgänglighet:</span>'
-        f'<span>{text}</span>'
+        f"<span>{text}</span>"
         f"</span>"
     )
     return HTMLResponse(html)
+
 
 @app.post("/offert", response_class=HTMLResponse)
 async def offert(
@@ -292,12 +315,15 @@ async def offert(
         errors.append("Ange ditt telefonnummer.")
     if errors:
         lis = "".join(f"<li>{e}</li>" for e in errors)
-        return HTMLResponse(f"""
+        return HTMLResponse(
+            f"""
             <div class="notice notice--err">
               <p class="font-semibold">Kunde inte skicka – kontrollera följande:</p>
               <ul class="list-disc notice__list">{lis}</ul>
             </div>
-            """, status_code=status.HTTP_400_BAD_REQUEST)
+            """,
+            status_code=status.HTTP_400_BAD_REQUEST,
+        )
 
     def esc(s: Optional[str]) -> str:
         return s.replace("<", "&lt;").replace(">", "&gt;") if s else ""
@@ -342,19 +368,27 @@ async def index(request: Request):
             "current_year": time.gmtime().tm_year,
             "owner_phone": OWNER_PHONE,
             "mail_from": MAIL_FROM or "info@sandladan.se",
+            "public_email": PUBLIC_EMAIL,
         },
     )
 
 
 ROBOT_PATH = BASE_DIR / "robots.txt"
 
+
 @app.get("/robots.txt")
 def robots():
     if ROBOT_PATH.exists():
-        return FileResponse(path=str(ROBOT_PATH), media_type="text/plain; charset=utf-8")
+        return FileResponse(
+            path=str(ROBOT_PATH), media_type="text/plain; charset=utf-8"
+        )
     return PlainTextResponse("User-agent: *\nAllow: /\n")
+
 
 # Legacy paths some browsers hit automatically
 @app.get("/site.webmanifest")
 def manifest():
-    return FileResponse(str(BASE_DIR / "static" / "site.webmanifest"), media_type="application/manifest+json")
+    return FileResponse(
+        str(BASE_DIR / "static" / "site.webmanifest"),
+        media_type="application/manifest+json",
+    )
