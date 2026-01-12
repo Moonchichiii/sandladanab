@@ -1,93 +1,88 @@
-<section id="offert" class="section" aria-labelledby="offert-titel">
-  <div class="container">
-    <h2 id="offert-titel">Begär offert</h2>
-    <p class="muted">Vi återkommer samma dag.</p>
+<section
+  id="offert"
+  class="section"
+  style="background: rgba(255, 255, 255, 0.02)"
+>
+  <div class="container" style="max-width: 42rem">
+    <div class="text-center" style="margin-bottom: 2rem">
+      <h2>Begär Offert</h2>
+      <p>Beskriv ditt projekt så återkommer vi oftast samma dag.</p>
+    </div>
 
     <form
       class="form"
       action="/offert"
       method="post"
       hx-post="/offert"
-      hx-target="#offert-resultat"
+      hx-target="#form-response"
       hx-swap="innerHTML"
       enctype="multipart/form-data"
     >
       <!-- Honeypot -->
-      <div class="visually-hidden" aria-hidden="true">
-        <label for="website">Om du är människa, lämna tomt</label>
-        <input
-          id="website"
-          name="website"
-          type="text"
-          tabindex="-1"
-          autocomplete="off"
-        />
-      </div>
+      <input
+        type="text"
+        name="website"
+        class="visually-hidden"
+        tabindex="-1"
+        autocomplete="off"
+      />
 
       <div>
-        <label class="label" for="namn">Namn *</label>
+        <label class="form-label" for="namn">Namn *</label>
         <input
+          class="form-input"
           id="namn"
           name="namn"
           required
-          class="input"
           autocomplete="name"
         />
       </div>
 
       <div>
-        <label class="label" for="telefon">Telefon *</label>
+        <label class="form-label" for="telefon">Telefon *</label>
         <input
+          class="form-input"
           id="telefon"
           name="telefon"
           type="tel"
-          inputmode="tel"
           required
-          class="input"
           autocomplete="tel"
         />
       </div>
 
       <div>
-        <label class="label" for="epost">E-post (valfritt)</label>
-        <input
-          id="epost"
-          name="epost"
-          type="email"
-          class="input"
-          autocomplete="email"
-        />
-      </div>
-
-      <div>
-        <label class="label" for="beskrivning">Kort beskrivning</label>
+        <label class="form-label" for="beskrivning"
+          >Vad behöver du hjälp med?</label
+        >
         <textarea
+          class="form-input"
           id="beskrivning"
           name="beskrivning"
           rows="4"
-          class="textarea"
         ></textarea>
       </div>
 
       <div>
-        <label class="label" for="bild">Ladda upp bild (valfritt)</label>
-        <div class="file-wrap">
-          <input
-            id="bild"
-            name="bild"
-            type="file"
-            accept="image/*"
-            class="visually-hidden"
-          />
-          <label for="bild" class="btn btn--ghost file-btn">Ladda upp</label>
-          <span class="file-name">Ingen fil vald</span>
-        </div>
+        <label class="form-label" for="bild">Bild (Valfritt)</label>
+        <input
+          class="form-input"
+          type="file"
+          id="bild"
+          name="bild"
+          accept="image/*"
+        />
       </div>
 
-      <button type="submit" class="btn btn--primary">Skicka förfrågan</button>
+      <button type="submit" class="btn btn--primary" style="width: 100%">
+        Skicka förfrågan
+      </button>
     </form>
+    <p class="help" style="margin-top: 0.75rem; text-align: center">
+      Genom att skicka formuläret godkänner du att vi behandlar dina uppgifter
+      för att kunna återkomma med offert. Inga uppgifter används i
+      marknadsföringssyfte och delas inte med tredje part.
+    </p>
 
-    <!-- Sibling target for HTMX responses -->
-    <div id="offert-resultat" aria-live="polite" role="status"></div>
+    <div id="form-response" style="margin-top: 1rem"></div>
   </div>
 </section>
