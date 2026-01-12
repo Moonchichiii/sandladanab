@@ -777,7 +777,6 @@
       }
 
       /* Footer */
-      /* Footer */
       .footer {
         border-top: 1px solid rgba(255, 255, 255, 0.08);
         background: rgba(255, 255, 255, 0.02);
@@ -838,12 +837,80 @@
       .footer__bar p + p {
         margin-top: 0.5rem;
       }
+      /* Footer call button (soft pill) */
+      .footer-call {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+
+        padding: 0.5rem 0.85rem;
+        border-radius: 9999px;
+
+        font-size: 0.85rem;
+        font-weight: 650;
+        line-height: 1;
+
+        /* subtle by default */
+        background: rgba(255, 255, 255, 0.06);
+        color: rgba(255, 255, 255, 0.92);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.15);
+
+        transition: transform 0.15s ease, background 0.15s ease,
+          color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+      }
+
+      /* fix the "slightly off" look */
+      .footer-call svg {
+        width: 16px;
+        height: 16px;
+        flex: 0 0 auto;
+        display: inline-block;
+        vertical-align: middle;
+        transform: translateY(-1px); /* aligns icon with text baseline */
+      }
+
+      .footer-call span {
+        display: inline-block;
+        vertical-align: middle;
+        transform: translateY(-0.5px); /* tiny optical match with icon */
+      }
+
+      .footer-call:hover {
+        background: rgba(245, 183, 0, 0.14);
+        border-color: rgba(245, 183, 0, 0.35);
+        color: var(--maskin);
+        transform: translateY(-1px);
+        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25),
+          inset 0 0 0 1px rgba(245, 183, 0, 0.18);
+      }
+
+      .footer-call:active {
+        transform: translateY(0);
+      }
+
+      .footer-call:focus-visible {
+        outline: 3px solid rgba(245, 183, 0, 0.85);
+        outline-offset: 3px;
+
+        /* also look "active" on keyboard focus */
+        background: rgba(245, 183, 0, 0.14);
+        border-color: rgba(245, 183, 0, 0.35);
+        color: var(--maskin);
+      }
 
       /* Mobile: center everything nicely */
       @media (max-width: 48rem) {
         .footer__grid {
           text-align: center;
         }
+
+        .footer-call {
+          font-size: 0.82rem;
+          padding: 0.48rem 0.8rem;
+        }
+
         .footer__links {
           justify-items: center;
         }
