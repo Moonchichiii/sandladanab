@@ -1,10 +1,12 @@
 <section id="galleri" class="section" aria-labelledby="galleri-titel">
   <div class="container">
-    <h2 id="galleri-titel">Galleri</h2>
-    <p class="muted">
-      Se exempel på vårt arbete – från grundläggning till färdiga
-      anläggningsprojekt på västkusten.
-    </p>
+    <div class="text-center" style="margin-bottom: 3rem">
+      <h2 id="galleri-titel">Galleri</h2>
+      <p class="muted">
+        Se exempel på vårt arbete – från grundläggning till färdiga
+        anläggningsprojekt på västkusten.
+      </p>
+    </div>
 
     {% set gallery_items = [ {"name": "Grundgrävning", "id": "1"}, {"name":
     "Markplanering", "id": "2"}, {"name": "Dräneringsjobb", "id": "3"}, {"name":
@@ -22,8 +24,8 @@
               {{ url_for('static', path='assets/images/gallery-' ~ item.id ~ '-320.webp') }} 320w,
               {{ url_for('static', path='assets/images/gallery-' ~ item.id ~ '-480.webp') }} 480w,
               {{ url_for('static', path='assets/images/gallery-' ~ item.id ~ '-640.webp') }} 640w"
-            sizes="(min-width: 48rem) 33vw, calc(50vw - 1.75rem)"
-            alt="{{ item.name }}"
+            sizes="(min-width: 48rem) 33vw, calc(50vw - 1.5rem)"
+            alt=""
             width="640"
             height="640"
             loading="lazy"
