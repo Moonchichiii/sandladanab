@@ -1,6 +1,7 @@
 <footer class="footer" aria-labelledby="sidfotsinfo">
   <div class="container">
     <div class="footer__grid">
+      <!-- Section 1: Brand -->
       <section>
         <h3 id="sidfotsinfo" class="footer__h">Sandlådan AB</h3>
         <p class="muted">
@@ -9,6 +10,7 @@
         <p class="muted">Göteborg med omnejd</p>
       </section>
 
+      <!-- Section 2: Links -->
       <nav aria-label="Snabblänkar">
         <h3 class="footer__h">Snabblänkar</h3>
         <ul class="footer__links">
@@ -18,58 +20,63 @@
         </ul>
       </nav>
 
+      <!-- Section 3: Contact -->
       <section aria-labelledby="kontakt">
         <h3 id="kontakt" class="footer__h">Kontakt</h3>
         <ul class="footer__links">
           <li>
+            <!-- Using the simple link style for email so it animates -->
+            <a
+              href="mailto:{{ public_email|default('info@sandladan.se') }}"
+              class="link-underline"
+              style="font-weight: 700"
+            >
+              {{ public_email|default('info@sandladan.se') }}
+            </a>
+          </li>
+          <li style="margin-top: 0.5rem">
+            <!-- Call button needs to be distinct -->
             <a
               href="tel:{{ owner_phone }}"
-              class="footer-call"
-              aria-label="Ring direkt"
+              class="btn btn--ghost btn--icon"
+              style="
+                border-radius: 99px;
+                padding: 0.4rem 1rem;
+                font-size: 0.85rem;
+              "
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
                 width="16"
                 height="16"
-                aria-hidden="true"
-                focusable="false"
+                viewBox="0 0 24 24"
+                fill="currentColor"
               >
                 <path
-                  fill="currentColor"
-                  d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1
-1 0 011.01-.24c1.12.37 2.33.57 3.58.57a1
-1 0 011 1V20a1 1 0 01-1 1C10.3 21
-3 13.7 3 4a1 1 0 011-1h3.5a1
-1 0 011 1c0 1.25.2 2.46.57 3.58a1
-1 0 01-.25 1.01l-2.2 2.2z"
+                  d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24c1.12.37 2.33.57 3.58.57a1 1 0 011 1V20a1 1 0 01-1 1C10.3 21 3 13.7 3 4a1 1 0 011-1h3.5a1 1 0 011 1c0 1.25.2 2.46.57 3.58a1 1 0 01-.25 1.01l-2.2 2.2z"
                 />
               </svg>
               <span>Ring direkt</span>
-            </a>
-          </li>
-          <li>
-            <a href="mailto:{{ public_email }}" class="link-underline">
-              {{ public_email }}
             </a>
           </li>
         </ul>
       </section>
     </div>
 
+    <!-- Bottom Bar -->
     <div class="footer__bar">
-      <p class="muted">
+      <p class="muted" style="margin-bottom: 0.75rem">
         © {{ current_year|default(2025) }} Sandlådan AB – Alla rättigheter
         förbehållna
       </p>
 
-      <p class="muted" style="margin-top: 0.5rem; font-size: 0.85rem">
-        <a href="/integritet" class="link-underline">Integritet & GDPR</a>
-        <span aria-hidden="true"> · </span>
-        Webbplats byggd av
+      <!-- Highlighted Bottom Links -->
+      <p class="muted" style="font-size: 0.9rem">
+        <a href="#">Integritet & GDPR</a>
+        <span aria-hidden="true" style="opacity: 0.3; margin: 0 0.5rem">|</span>
+        Webbplats av
         <a
           href="https://nordiccodeworks.com"
-          class="link-underline"
           target="_blank"
           rel="noopener noreferrer"
         >
