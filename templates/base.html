@@ -703,6 +703,30 @@
         }
       }
     </style>
+    <!-- SEO: Local Business Schema -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "GeneralContractor",
+        "name": "Sandlådan AB",
+        "image": "{{ BASE_URL }}/static/assets/images/hero-excavator-1280.webp",
+        "url": "{{ BASE_URL }}",
+        "telephone": "{{ owner_phone }}",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Göteborg",
+          "addressRegion": "Västra Götaland",
+          "addressCountry": "SE"
+        },
+        "priceRange": "$$",
+        "openingHoursSpecification": {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+          "opens": "07:00",
+          "closes": "16:00"
+        }
+      }
+    </script>
   </head>
 
   <body class="min-h-full">
