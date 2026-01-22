@@ -19,6 +19,11 @@ from fastapi.templating import Jinja2Templates
 from starlette.middleware.cors import CORSMiddleware
 from starlette.middleware.gzip import GZipMiddleware
 from starlette.middleware.trustedhost import TrustedHostMiddleware
+from starlette.middleware.proxy_headers import ProxyHeadersMiddleware
+
+
+def _csv_env(name: str, default: str = "") -> list[str]:
+    return [x.strip() for x in os.getenv(name, default).split(",") if x.strip()]
 
 # ---------------------------------------------------------------------------
 # App
@@ -31,16 +36,16 @@ app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="stat
 # ---------------------------------------------------------------------------
 # Env & security
 # ---------------------------------------------------------------------------
-ALLOWED_HOSTS = [
-    h.strip()
-    for h in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
-    if h.strip()
-]
+ALLOWED_HOSTS = _csv_env("ALLOWED_HOSTS", "localhost,127.0.0.1")
 BASE_URL = os.getenv("BASE_URL", "").strip()
+
+CORS_ORIGINS = _csv_env(
+    "CORS_ORIGINS",
+    "http://localhost:8000,http://127.0.0.1:8000",
+)
+
 templates.env.globals.update(BASE_URL=BASE_URL)
 
-# CORS: only if you call API from another origin
-CORS_ORIGINS = [BASE_URL] if BASE_URL else ["http://localhost", "http://127.0.0.1"]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=CORS_ORIGINS,
@@ -48,9 +53,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-if ALLOWED_HOSTS:
-    app.add_middleware(TrustedHostMiddleware, allowed_hosts=ALLOWED_HOSTS)
+app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
+app.add_middleware(TrustedHostMiddleware, allowed_hosts=ALLOWED_HOSTS)
 
 HSTS_ENABLE = os.getenv("HSTS_ENABLE", "false").lower() == "true"
 SEC_HEADERS = {
