@@ -19,7 +19,7 @@ from fastapi.templating import Jinja2Templates
 from starlette.middleware.cors import CORSMiddleware
 from starlette.middleware.gzip import GZipMiddleware
 from starlette.middleware.trustedhost import TrustedHostMiddleware
-from starlette.middleware.proxy_headers import ProxyHeadersMiddleware
+
 
 
 def _csv_env(name: str, default: str = "") -> list[str]:
@@ -53,7 +53,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
 app.add_middleware(TrustedHostMiddleware, allowed_hosts=ALLOWED_HOSTS)
 
 HSTS_ENABLE = os.getenv("HSTS_ENABLE", "false").lower() == "true"
