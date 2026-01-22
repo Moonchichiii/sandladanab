@@ -37,8 +37,15 @@ app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="stat
 # Env & security
 # ---------------------------------------------------------------------------
 @app.middleware("http")
-async def _debug_host(request: Request, call_next):
-    print("HOST:", request.headers.get("host"), "PATH:", request.url.path)
+async def _debug_static(request: Request, call_next):
+    if request.url.path.startswith("/static/"):
+        print(
+            "STATIC REQ",
+            "HOST:", request.headers.get("host"),
+            "PATH:", request.url.path,
+            "DISABLE_TRUSTED_HOST:", os.getenv("DISABLE_TRUSTED_HOST"),
+            "ALLOWED_HOSTS:", os.getenv("ALLOWED_HOSTS"),
+        )
     return await call_next(request)
 
 
