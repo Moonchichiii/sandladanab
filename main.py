@@ -53,7 +53,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.add_middleware(TrustedHostMiddleware, allowed_hosts=ALLOWED_HOSTS)
+DISABLE_TRUSTED_HOST = os.getenv("DISABLE_TRUSTED_HOST", "false").lower() == "true"
+
+if not DISABLE_TRUSTED_HOST:
+    app.add_middleware(TrustedHostMiddleware, allowed_hosts=ALLOWED_HOSTS)
+
+#app.add_middleware(TrustedHostMiddleware, allowed_hosts=ALLOWED_HOSTS)
 
 HSTS_ENABLE = os.getenv("HSTS_ENABLE", "false").lower() == "true"
 SEC_HEADERS = {
