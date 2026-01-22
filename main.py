@@ -36,6 +36,13 @@ app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="stat
 # ---------------------------------------------------------------------------
 # Env & security
 # ---------------------------------------------------------------------------
+@app.middleware("http")
+async def _debug_host(request: Request, call_next):
+    print("HOST:", request.headers.get("host"), "PATH:", request.url.path)
+    return await call_next(request)
+
+
+
 ALLOWED_HOSTS = _csv_env("ALLOWED_HOSTS", "localhost,127.0.0.1")
 BASE_URL = os.getenv("BASE_URL", "").strip()
 
