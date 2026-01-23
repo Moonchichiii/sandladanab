@@ -103,7 +103,11 @@ RATE_WINDOW = int(os.getenv("RATE_WINDOW", "60"))
 RATE_MAX = int(os.getenv("RATE_MAX", "5"))
 
 # --- Calendar Config ---
-LEDIGA_TEXT = os.getenv("LEDIGA_TEXT", "Lediga v. 42–43 • Snabbt platsbesök i Göteborg med omnejd")
+LEDIGA_TEXT = os.getenv(
+    "LEDIGA_TEXT",
+    "Tillgänglig för uppdrag • Snabbt platsbesök i Göteborg med omnejd"
+)
+
 CALENDAR_MODE = os.getenv("CALENDAR_MODE", "ics").lower().strip()
 CALENDAR_ICS_URL = os.getenv("CALENDAR_ICS_URL", "").strip()
 TIMEZONE = os.getenv("TIMEZONE", "Europe/Stockholm").strip()
