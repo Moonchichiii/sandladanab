@@ -397,8 +397,8 @@ async def offert(
 
 @app.get("/robots.txt")
 def robots():
-    if ROBOT_PATH.exists(): return FileResponse(str(ROBOT_PATH), media_type="text/plain; charset=utf-8")
-    return PlainTextResponse("User-agent: *\nAllow: /\n")
+    content = "User-agent: *\nAllow: /\n"
+    return PlainTextResponse(content)
 
 @app.get("/site.webmanifest")
 def manifest():
