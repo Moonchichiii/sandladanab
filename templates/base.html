@@ -704,10 +704,10 @@
       }
     </style>
     <!-- SEO: Local Business Schema -->
-    <script
-  type="application/ld+json"
-  src="{{ url_for('schema') }}"
-></script>
+   <script type="application/ld+json" nonce="{{ csp_nonce(request) }}">
+{{ schema_json | safe }}
+</script>
+
   </head>
 
   <body class="min-h-full">

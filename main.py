@@ -1,14 +1,17 @@
 from __future__ import annotations
 
+import json
+import mimetypes
 import os
 import pathlib
+import secrets
 import smtplib
 import ssl
 import time
 from datetime import datetime, timedelta
 from email.message import EmailMessage
 from typing import Optional
-import json
+
 import httpx
 from dateutil import tz
 from fastapi import BackgroundTasks, FastAPI, File, Form, Request, UploadFile, status
@@ -16,222 +19,154 @@ from fastapi.responses import FileResponse, HTMLResponse, PlainTextResponse, Res
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from icalendar import Calendar
+from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.middleware.cors import CORSMiddleware
 from starlette.middleware.gzip import GZipMiddleware
 from starlette.middleware.trustedhost import TrustedHostMiddleware
-import mimetypes
+
+# ---------------------------------------------------------------------------
+# 1. Configuration & Constants
+# ---------------------------------------------------------------------------
+
+# Mimetypes
 mimetypes.add_type("application/javascript", ".js")
 mimetypes.add_type("font/woff2", ".woff2")
 
+# Base Paths
+BASE_DIR = pathlib.Path(__file__).parent
+ROBOT_PATH = BASE_DIR / "robots.txt"
 
+# Env Helpers
 def _csv_env(name: str, default: str = "") -> list[str]:
     return [x.strip() for x in os.getenv(name, default).split(",") if x.strip()]
-
 
 def _env_bool(name: str, default: str = "false") -> bool:
     return os.getenv(name, default).strip().lower() == "true"
 
-
-# ---------------------------------------------------------------------------
-# App / paths
-# ---------------------------------------------------------------------------
-BASE_DIR = pathlib.Path(__file__).parent
-app = FastAPI(title="Sandlådan AB")
-
-templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
-app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
-
-ROBOT_PATH = BASE_DIR / "robots.txt"
-
-
-# ---------------------------------------------------------------------------
-# Env (Render-friendly)
-# ---------------------------------------------------------------------------
+# App Config
 BASE_URL = os.getenv("BASE_URL", "").strip()
-
+DEBUG_STATIC = _env_bool("DEBUG_STATIC", "false")
 ALLOWED_HOSTS = _csv_env("ALLOWED_HOSTS", "")
 DISABLE_TRUSTED_HOST = _env_bool("DISABLE_TRUSTED_HOST", "false")
+CORS_ORIGINS = _csv_env("CORS_ORIGINS", "http://localhost:8000,http://127.0.0.1:8000")
 
-CORS_ORIGINS = _csv_env(
-    "CORS_ORIGINS",
-    "http://localhost:8000,http://127.0.0.1:8000",
-)
-
-DEBUG_STATIC = _env_bool("DEBUG_STATIC", "false")
+# Security Config
 HSTS_ENABLE = _env_bool("HSTS_ENABLE", "false")
 
-templates.env.globals.update(BASE_URL=BASE_URL)
+# Contact / Owner
+OWNER_PHONE = os.environ.get("OWNER_PHONE", "+46XXXXXXXX")
+PUBLIC_EMAIL = os.environ.get("PUBLIC_EMAIL", "info@sandladan.se")
 
-
-# ---------------------------------------------------------------------------
-# Middleware
-# ---------------------------------------------------------------------------
-if DEBUG_STATIC:
-
-    @app.middleware("http")
-    async def _debug_static(request: Request, call_next):
-        if request.url.path.startswith("/static/"):
-            print(
-                "STATIC REQ",
-                "HOST:", request.headers.get("host"),
-                "PATH:", request.url.path,
-                "DISABLE_TRUSTED_HOST:", os.getenv("DISABLE_TRUSTED_HOST"),
-                "ALLOWED_HOSTS:", os.getenv("ALLOWED_HOSTS"),
-            )
-        return await call_next(request)
-
-
-# Only enable TrustedHost when we actually have host rules AND not disabled
-if (not DISABLE_TRUSTED_HOST) and ALLOWED_HOSTS:
-    app.add_middleware(TrustedHostMiddleware, allowed_hosts=ALLOWED_HOSTS)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=CORS_ORIGINS,
-    allow_methods=["GET", "POST"],
-    allow_headers=["*"],
-)
-
-app.add_middleware(GZipMiddleware, minimum_size=500)
-
-
-SEC_HEADERS = {
-    "Content-Security-Policy": (
-        "default-src 'self'; "
-        "img-src 'self' data:; "
-        "style-src 'self' 'unsafe-inline'; "
-        "script-src 'self'; "
-        "font-src 'self' data:; "
-        "connect-src 'self'; "
-        "form-action 'self'; "
-        "base-uri 'self'; "
-        "frame-ancestors 'none'; "
-        "upgrade-insecure-requests"
-    ),
-    "Referrer-Policy": "strict-origin-when-cross-origin",
-    "X-Content-Type-Options": "nosniff",
-    "X-Frame-Options": "DENY",
-    "Permissions-Policy": "geolocation=(), microphone=(), camera=()",
-}
-if HSTS_ENABLE:
-    SEC_HEADERS["Strict-Transport-Security"] = (
-        "max-age=31536000; includeSubDomains; preload"
-    )
-
-
-@app.middleware("http")
-async def _security_headers(request: Request, call_next):
-    resp: Response = await call_next(request)
-    for k, v in SEC_HEADERS.items():
-        resp.headers.setdefault(k, v)
-    return resp
-
-
-@app.middleware("http")
-async def _static_cache_control(request: Request, call_next):
-    resp: Response = await call_next(request)
-    if request.url.path.startswith("/static/"):
-        resp.headers.setdefault("Cache-Control", "public, max-age=31536000, immutable")
-    return resp
-
-
-# ---------------------------------------------------------------------------
-# Mail
-# ---------------------------------------------------------------------------
+# Email Config
 SMTP_HOST = os.environ.get("SMTP_HOST", "")
 SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
 SMTP_USER = os.environ.get("SMTP_USER", "")
 SMTP_PASS = os.environ.get("SMTP_PASS", "")
 SMTP_STARTTLS = _env_bool("SMTP_STARTTLS", "true")
-
 MAIL_FROM = os.environ.get("MAIL_FROM", SMTP_USER or "no-reply@sandladan.se")
 MAIL_TO = os.environ.get("MAIL_TO", "")
 
-OWNER_PHONE = os.environ.get("OWNER_PHONE", "+46XXXXXXXX")
-PUBLIC_EMAIL = os.environ.get("PUBLIC_EMAIL", "info@sandladan.se")
-
-
-# Rate limit (simple in-memory token bucket)
-RATE_BUCKET: dict[str, list[float]] = {}
+# Rate Limit Config
 RATE_WINDOW = int(os.getenv("RATE_WINDOW", "60"))
 RATE_MAX = int(os.getenv("RATE_MAX", "5"))
 
-
-def too_many_requests(ip: str) -> bool:
-    now = time.time()
-    bucket = RATE_BUCKET.setdefault(ip, [])
-    RATE_BUCKET[ip] = [t for t in bucket if now - t < RATE_WINDOW]
-    if len(RATE_BUCKET[ip]) >= RATE_MAX:
-        return True
-    RATE_BUCKET[ip].append(now)
-    return False
-
-
-def build_email(
-    subject: str,
-    body_html: str,
-    body_text: str,
-    attachments: list[tuple[str, bytes, str]] | None = None,
-) -> EmailMessage:
-    msg = EmailMessage()
-    msg["Subject"] = subject
-    msg["From"] = MAIL_FROM
-    msg["To"] = MAIL_TO
-    msg.set_content(body_text)
-    msg.add_alternative(body_html, subtype="html")
-    for filename, data, mime in attachments or []:
-        maintype, _, subtype = mime.partition("/")
-        msg.add_attachment(data, maintype=maintype, subtype=subtype, filename=filename)
-    return msg
-
-
-def send_email_message(msg: EmailMessage) -> None:
-    # Quietly no-op if not configured
-    if not (SMTP_HOST and SMTP_PORT and MAIL_TO and MAIL_FROM):
-        return
-
-    if SMTP_PORT == 465 and not SMTP_STARTTLS:
-        context = ssl.create_default_context()
-        with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, context=context) as server:
-            if SMTP_USER and SMTP_PASS:
-                server.login(SMTP_USER, SMTP_PASS)
-            server.send_message(msg)
-        return
-
-    with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
-        if SMTP_STARTTLS:
-            server.starttls(context=ssl.create_default_context())
-        if SMTP_USER and SMTP_PASS:
-            server.login(SMTP_USER, SMTP_PASS)
-        server.send_message(msg)
-
-
-# ---------------------------------------------------------------------------
-# Availability (ICS)
-# ---------------------------------------------------------------------------
-LEDIGA_TEXT = os.getenv(
-    "LEDIGA_TEXT",
-    "Lediga v. 42–43 • Snabbt platsbesök i Göteborg med omnejd",
-)
-
+# Calendar Config
+LEDIGA_TEXT = os.getenv("LEDIGA_TEXT", "Lediga v. 42–43 • Snabbt platsbesök i Göteborg med omnejd")
 CALENDAR_MODE = os.getenv("CALENDAR_MODE", "ics").lower().strip()
 CALENDAR_ICS_URL = os.getenv("CALENDAR_ICS_URL", "").strip()
 TIMEZONE = os.getenv("TIMEZONE", "Europe/Stockholm").strip()
 AVAILABILITY_WEEKS_AHEAD = int(os.getenv("AVAILABILITY_WEEKS_AHEAD", "6"))
 STATUS_CACHE_TTL = int(os.getenv("STATUS_CACHE_TTL", "1800"))
 
-_status_cache = {"text": LEDIGA_TEXT, "ts": 0.0}
+# ---------------------------------------------------------------------------
+# 2. Services & Helper Classes
+# ---------------------------------------------------------------------------
 
+class CSPNonceMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        request.state.csp_nonce = secrets.token_urlsafe(16)
+        return await call_next(request)
 
-async def availability_text_from_ics() -> str:
-    if not CALENDAR_ICS_URL:
-        return LEDIGA_TEXT
+class RateLimiter:
+    """Simple in-memory token bucket rate limiter."""
+    bucket: dict[str, list[float]] = {}
 
-    now = time.time()
-    if now - _status_cache["ts"] < STATUS_CACHE_TTL and _status_cache["text"]:
-        return _status_cache["text"]
+    @classmethod
+    def is_rate_limited(cls, ip: str) -> bool:
+        now = time.time()
+        bucket = cls.bucket.setdefault(ip, [])
+        # Filter timestamps within window
+        cls.bucket[ip] = [t for t in bucket if now - t < RATE_WINDOW]
 
-    try:
+        if len(cls.bucket[ip]) >= RATE_MAX:
+            return True
+
+        cls.bucket[ip].append(now)
+        return False
+
+class EmailService:
+    @staticmethod
+    def build_message(
+        subject: str,
+        body_html: str,
+        body_text: str,
+        attachments: list[tuple[str, bytes, str]] | None = None,
+    ) -> EmailMessage:
+        msg = EmailMessage()
+        msg["Subject"] = subject
+        msg["From"] = MAIL_FROM
+        msg["To"] = MAIL_TO
+        msg.set_content(body_text)
+        msg.add_alternative(body_html, subtype="html")
+
+        for filename, data, mime in attachments or []:
+            maintype, _, subtype = mime.partition("/")
+            msg.add_attachment(data, maintype=maintype, subtype=subtype, filename=filename)
+        return msg
+
+    @staticmethod
+    def send(msg: EmailMessage) -> None:
+        if not (SMTP_HOST and SMTP_PORT and MAIL_TO and MAIL_FROM):
+            return
+
+        try:
+            if SMTP_PORT == 465 and not SMTP_STARTTLS:
+                context = ssl.create_default_context()
+                with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, context=context) as server:
+                    if SMTP_USER and SMTP_PASS:
+                        server.login(SMTP_USER, SMTP_PASS)
+                    server.send_message(msg)
+            else:
+                with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
+                    if SMTP_STARTTLS:
+                        server.starttls(context=ssl.create_default_context())
+                    if SMTP_USER and SMTP_PASS:
+                        server.login(SMTP_USER, SMTP_PASS)
+                    server.send_message(msg)
+        except Exception as e:
+            print(f"Error sending email: {e}")
+
+class CalendarService:
+    _cache = {"text": LEDIGA_TEXT, "ts": 0.0}
+
+    @classmethod
+    async def get_text(cls) -> str:
+        if CALENDAR_MODE != "ics" or not CALENDAR_ICS_URL:
+            return LEDIGA_TEXT
+
+        now = time.time()
+        if now - cls._cache["ts"] < STATUS_CACHE_TTL and cls._cache["text"]:
+            return cls._cache["text"]
+
+        try:
+            text = await cls._fetch_and_parse_ics()
+            cls._cache.update({"text": text, "ts": now})
+            return text
+        except Exception:
+            return LEDIGA_TEXT
+
+    @classmethod
+    async def _fetch_and_parse_ics(cls) -> str:
         tzinfo = tz.gettz(TIMEZONE)
         end = datetime.now(tzinfo) + timedelta(weeks=AVAILABILITY_WEEKS_AHEAD)
 
@@ -243,6 +178,7 @@ async def availability_text_from_ics() -> str:
             cal = Calendar.from_ical(r.content)
 
         busy_weeks: set[int] = set()
+
         for comp in cal.walk("VEVENT"):
             dtstart = comp.get("DTSTART")
             dtend = comp.get("DTEND") or comp.get("DTSTART")
@@ -252,11 +188,9 @@ async def availability_text_from_ics() -> str:
             s = dtstart.dt
             e = dtend.dt if dtend else s
 
-            # normalize tz if possible
-            if hasattr(s, "astimezone"):
-                s = s.astimezone(tzinfo)
-            if hasattr(e, "astimezone"):
-                e = e.astimezone(tzinfo)
+            # Normalize timezone
+            if hasattr(s, "astimezone"): s = s.astimezone(tzinfo)
+            if hasattr(e, "astimezone"): e = e.astimezone(tzinfo)
 
             if s > end:
                 continue
@@ -268,8 +202,8 @@ async def availability_text_from_ics() -> str:
 
         today = datetime.now(tzinfo).date()
         start_week = today.isocalendar().week
-
         weeks: list[int] = []
+
         for woffset in range(0, AVAILABILITY_WEEKS_AHEAD + 1):
             w = ((start_week - 1 + woffset) % 52) + 1
             if w not in busy_weeks:
@@ -279,42 +213,111 @@ async def availability_text_from_ics() -> str:
 
         if weeks:
             weeks_str = f"{weeks[0]}" if len(weeks) == 1 else f"{weeks[0]}–{weeks[1]}"
-            text = f"Lediga v. {weeks_str} • Snabbt platsbesök i Göteborg med omnejd"
-        else:
-            text = LEDIGA_TEXT
+            return f"Lediga v. {weeks_str} • Snabbt platsbesök i Göteborg med omnejd"
 
-        _status_cache.update({"text": text, "ts": now})
-        return text
-    except Exception:
         return LEDIGA_TEXT
 
+# ---------------------------------------------------------------------------
+# 3. Application Setup & Middleware
+# ---------------------------------------------------------------------------
 
-async def availability_text() -> str:
-    if CALENDAR_MODE == "ics":
-        return await availability_text_from_ics()
-    return LEDIGA_TEXT
+app = FastAPI(title="Sandlådan AB")
+
+# Template & Static Setup
+templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
+app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
+
+# Template Globals
+templates.env.globals.update(BASE_URL=BASE_URL)
+
+def csp_nonce(request: Request) -> str:
+    """Helper for templates to access nonce."""
+    return getattr(request.state, "csp_nonce", "")
+
+templates.env.globals["csp_nonce"] = csp_nonce
+
+# -- Register Middlewares --
+
+# 1. Nonce Middleware (Must be added after app creation)
+app.add_middleware(CSPNonceMiddleware)
+
+# 2. Trusted Host
+if (not DISABLE_TRUSTED_HOST) and ALLOWED_HOSTS:
+    app.add_middleware(TrustedHostMiddleware, allowed_hosts=ALLOWED_HOSTS)
+
+# 3. CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=CORS_ORIGINS,
+    allow_methods=["GET", "POST"],
+    allow_headers=["*"],
+)
+
+# 4. Gzip
+app.add_middleware(GZipMiddleware, minimum_size=500)
+
+
+# -- Custom Middleware Logic --
+
+if DEBUG_STATIC:
+    @app.middleware("http")
+    async def _debug_static(request: Request, call_next):
+        if request.url.path.startswith("/static/"):
+            print(f"STATIC REQ | HOST: {request.headers.get('host')} | PATH: {request.url.path}")
+        return await call_next(request)
+
+@app.middleware("http")
+async def _security_headers(request: Request, call_next):
+    """Combines security headers, CSP generation, and HSTS."""
+    response: Response = await call_next(request)
+
+    nonce = getattr(request.state, "csp_nonce", "")
+
+    # Construct script-src safely
+    script_src = "script-src 'self'"
+    if nonce:
+        script_src += f" 'nonce-{nonce}'"
+
+    csp_directives = [
+        "default-src 'self'",
+        "img-src 'self' data:",
+        "style-src 'self' 'unsafe-inline'",
+        script_src,
+        "font-src 'self' data:",
+        "connect-src 'self'",
+        "form-action 'self'",
+        "base-uri 'self'",
+        "frame-ancestors 'none'",
+        "upgrade-insecure-requests"
+    ]
+
+    response.headers.setdefault("Content-Security-Policy", "; ".join(csp_directives))
+    response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+    response.headers.setdefault("X-Content-Type-Options", "nosniff")
+    response.headers.setdefault("X-Frame-Options", "DENY")
+    response.headers.setdefault("Permissions-Policy", "geolocation=(), microphone=(), camera=()")
+
+    if HSTS_ENABLE:
+        response.headers.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload")
+
+    return response
+
+@app.middleware("http")
+async def _static_cache_control(request: Request, call_next):
+    """Sets aggressive caching for static assets."""
+    response: Response = await call_next(request)
+    if request.url.path.startswith("/static/"):
+        response.headers.setdefault("Cache-Control", "public, max-age=31536000, immutable")
+    return response
 
 
 # ---------------------------------------------------------------------------
-# Routes
+# 4. Routes
 # ---------------------------------------------------------------------------
-@app.api_route("/", methods=["GET", "HEAD"], response_class=HTMLResponse)
-async def index(request: Request):
-    return templates.TemplateResponse(
-        "index.html",
-        {
-            "request": request,
-            "current_year": time.gmtime().tm_year,
-            "owner_phone": OWNER_PHONE,
-            "mail_from": MAIL_FROM or "info@sandladan.se",
-            "public_email": PUBLIC_EMAIL,
-        },
-    )
-
 
 @app.get("/status", response_class=HTMLResponse)
 async def status_snippet():
-    text = await availability_text()
+    text = await CalendarService.get_text()
     html = (
         f'<span class="inline-flex items-center gap-2">'
         f'<span class="w-2 h-2 rounded-full" style="background:#22c55e" aria-hidden="true"></span>'
@@ -337,7 +340,9 @@ async def offert(
     bild: Optional[UploadFile] = File(None),
 ):
     ip = request.client.host if request.client else "unknown"
-    if too_many_requests(ip):
+
+    # 1. Rate Check
+    if RateLimiter.is_rate_limited(ip):
         return HTMLResponse(
             """
             <div class="notice notice--err">
@@ -348,6 +353,7 @@ async def offert(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
         )
 
+    # 2. Honeypot Check
     if website:
         return HTMLResponse(
             """
@@ -358,11 +364,11 @@ async def offert(
             """
         )
 
+    # 3. Validation
     errors = []
-    if not namn.strip():
-        errors.append("Ange ditt namn.")
-    if not telefon.strip():
-        errors.append("Ange ditt telefonnummer.")
+    if not namn.strip(): errors.append("Ange ditt namn.")
+    if not telefon.strip(): errors.append("Ange ditt telefonnummer.")
+
     if errors:
         lis = "".join(f"<li>{e}</li>" for e in errors)
         return HTMLResponse(
@@ -375,6 +381,7 @@ async def offert(
             status_code=status.HTTP_400_BAD_REQUEST,
         )
 
+    # 4. Prepare Email
     def esc(s: Optional[str]) -> str:
         return s.replace("<", "&lt;").replace(">", "&gt;") if s else ""
 
@@ -392,14 +399,15 @@ async def offert(
         f"Beskrivning:\n{beskrivning or '-'}\n"
     )
 
-    attachments: list[tuple[str, bytes, str]] = []
+    attachments = []
     if bild and bild.filename:
         data = await bild.read()
         mime = bild.content_type or "application/octet-stream"
         attachments.append((bild.filename, data, mime))
 
-    msg = build_email(subject, body_html, body_text, attachments)
-    background.add_task(send_email_message, msg)
+    # 5. Send Background Task
+    msg = EmailService.build_message(subject, body_html, body_text, attachments)
+    background.add_task(EmailService.send, msg)
 
     return HTMLResponse(
         f"""
@@ -411,11 +419,12 @@ async def offert(
     )
 
 
-@app.get("/schema.json", name="schema")
-def schema(request: Request):
+@app.api_route("/", methods=["GET", "HEAD"], response_class=HTMLResponse)
+async def index(request: Request):
+    """Main index route. Generates Schema.org JSON and serves index.html."""
     base = (BASE_URL or f"{request.url.scheme}://{request.url.netloc}").rstrip("/")
 
-    data = {
+    schema = {
         "@context": "https://schema.org",
         "@type": "GeneralContractor",
         "name": "Sandlådan AB",
@@ -437,10 +446,16 @@ def schema(request: Request):
         },
     }
 
-    return Response(
-        content=json.dumps(data, ensure_ascii=False),
-        media_type="application/ld+json; charset=utf-8",
-        headers={"Cache-Control": "public, max-age=86400"},
+    return templates.TemplateResponse(
+        "index.html",
+        {
+            "request": request,
+            "current_year": time.gmtime().tm_year,
+            "owner_phone": OWNER_PHONE,
+            "mail_from": MAIL_FROM or "info@sandladan.se",
+            "public_email": PUBLIC_EMAIL,
+            "schema_json": json.dumps(schema, ensure_ascii=False),
+        },
     )
 
 
