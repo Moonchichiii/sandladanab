@@ -357,7 +357,8 @@ async def status_snippet():
     return HTMLResponse(
         f'<span class="inline-flex items-center gap-2">'
         f'<span class="w-2 h-2 rounded-full" style="background:#22c55e" aria-hidden="true"></span>'
-        f'<span class="font-medium">Tillgänglighet:</span><span>{text}</span></span>'
+        f'<span class="font-medium">{text}</span>'
+        f'</span>'
     )
 
 @app.post("/offert", response_class=HTMLResponse)
