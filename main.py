@@ -28,9 +28,14 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 # 1. Configuration & Constants
 # ---------------------------------------------------------------------------
 
-# Mimetypes
+# Mimetypes (Fixed: Added image types to prevent nosniff errors)
 mimetypes.add_type("application/javascript", ".js")
 mimetypes.add_type("font/woff2", ".woff2")
+mimetypes.add_type("image/webp", ".webp")
+mimetypes.add_type("image/svg+xml", ".svg")
+mimetypes.add_type("image/png", ".png")
+mimetypes.add_type("image/jpeg", ".jpg")
+mimetypes.add_type("image/jpeg", ".jpeg")
 
 # Base Paths
 BASE_DIR = pathlib.Path(__file__).parent
@@ -278,9 +283,10 @@ async def _security_headers(request: Request, call_next):
     if nonce:
         script_src += f" 'nonce-{nonce}'"
 
+    # Fixed: Expanded img-src to allow blob, data, and both domain variants
     csp_directives = [
         "default-src 'self'",
-        "img-src 'self' data:",
+        "img-src 'self' data: blob: https://sandladan.se https://www.sandladan.se",
         "style-src 'self' 'unsafe-inline'",
         script_src,
         "font-src 'self' data:",
