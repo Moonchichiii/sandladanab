@@ -400,11 +400,11 @@ async def offert(
 
     return HTMLResponse(f'<div class="notice notice--ok"><p class="font-semibold">Tack {esc(namn)}!</p><p class="text-sm notice__muted">Vi återkommer på {esc(telefon)}.</p></div>')
 
-@app.get("/robots.txt")
-def robots():
-    content = "User-agent: *\nAllow: /\n"
-    return PlainTextResponse(content)
 
 @app.get("/site.webmanifest")
 def manifest():
     return FileResponse(str(BASE_DIR / "static" / "site.webmanifest"), media_type="application/manifest+json")
+
+@app.get("/robots.txt")
+def robots():
+        return PlainTextResponse("User-agent: *\nAllow: /\n")
