@@ -12,11 +12,13 @@
     menu.setAttribute("aria-hidden", open ? "false" : "true");
 
     if (!open) {
+      // Prevent focus from entering the closed menu
       menu.setAttribute("inert", "");
       menu.querySelectorAll(focusablesSelector).forEach((el) => {
         el.setAttribute("tabindex", "-1");
       });
     } else {
+      // Restore focusability when opened
       menu.removeAttribute("inert");
       menu.querySelectorAll("[tabindex='-1']").forEach((el) => {
         el.removeAttribute("tabindex");
@@ -34,7 +36,7 @@
 
   function closeMenu() {
     setMenu(false);
-    btn.focus(); // nice keyboard UX
+    btn.focus(); // Return focus to the toggle button
   }
 
   btn.addEventListener("click", (e) => {
@@ -42,13 +44,11 @@
     toggleMenu();
   });
 
-  // Close when clicking any link inside the menu
+  // Close the menu when a link inside it is clicked
   menu.addEventListener("click", (e) => {
     const link = e.target.closest("a");
     if (!link) return;
 
-    // If it's an in-page anchor, close menu immediately.
-    // Tel links also fine to close.
     closeMenu();
   });
 
@@ -56,6 +56,6 @@
     if (e.key === "Escape") closeMenu();
   });
 
-  // Ensure correct initial state
+  // Start closed to match ARIA/inert/tabindex state
   setMenu(false);
 })();

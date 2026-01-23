@@ -8,7 +8,7 @@ import time
 from datetime import datetime, timedelta
 from email.message import EmailMessage
 from typing import Optional
-
+import json
 import httpx
 from dateutil import tz
 from fastapi import BackgroundTasks, FastAPI, File, Form, Request, UploadFile, status
@@ -19,6 +19,9 @@ from icalendar import Calendar
 from starlette.middleware.cors import CORSMiddleware
 from starlette.middleware.gzip import GZipMiddleware
 from starlette.middleware.trustedhost import TrustedHostMiddleware
+import mimetypes
+mimetypes.add_type("application/javascript", ".js")
+mimetypes.add_type("font/woff2", ".woff2")
 
 
 def _csv_env(name: str, default: str = "") -> list[str]:
@@ -97,8 +100,8 @@ SEC_HEADERS = {
         "default-src 'self'; "
         "img-src 'self' data:; "
         "style-src 'self' 'unsafe-inline'; "
-        # NOTE: JSON-LD is inline <script>. If you see it blocked, add 'unsafe-inline' here.
         "script-src 'self'; "
+        "font-src 'self' data:; "
         "connect-src 'self'; "
         "form-action 'self'; "
         "base-uri 'self'; "
@@ -405,6 +408,39 @@ async def offert(
           <p class="text-sm notice__muted">Vi återkommer samma dag på {esc(telefon)}.</p>
         </div>
         """
+    )
+
+
+@app.get("/schema.json", name="schema")
+def schema(request: Request):
+    base = (BASE_URL or f"{request.url.scheme}://{request.url.netloc}").rstrip("/")
+
+    data = {
+        "@context": "https://schema.org",
+        "@type": "GeneralContractor",
+        "name": "Sandlådan AB",
+        "image": f"{base}/static/assets/images/hero-excavator-1280.webp",
+        "url": base,
+        "telephone": OWNER_PHONE,
+        "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Göteborg",
+            "addressRegion": "Västra Götaland",
+            "addressCountry": "SE",
+        },
+        "priceRange": "$$",
+        "openingHoursSpecification": {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+            "opens": "07:00",
+            "closes": "16:00",
+        },
+    }
+
+    return Response(
+        content=json.dumps(data, ensure_ascii=False),
+        media_type="application/ld+json; charset=utf-8",
+        headers={"Cache-Control": "public, max-age=86400"},
     )
 
 
