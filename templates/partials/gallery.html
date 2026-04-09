@@ -8,32 +8,29 @@
       </p>
     </div>
 
-    {% set gallery_items = [ {"name": "Grundgrävning", "id": "1"}, {"name":
-    "Markplanering", "id": "2"}, {"name": "Dräneringsjobb", "id": "3"}, {"name":
-    "Ledningsförläggning", "id": "4"}, {"name": "Schaktarbete", "id": "5"},
-    {"name": "Färdigställt projekt", "id": "6"} ] %}
-
     <ul class="gallery" role="list">
       {% for item in gallery_items %}
-      <li class="gallery__item">
-        <figure class="gallery__figure">
-          <img
-            class="gallery__img"
-            src="{{ url_for('static', path='assets/images/gallery-' ~ item.id ~ '-640.webp') }}"
-            srcset="
-              {{ url_for('static', path='assets/images/gallery-' ~ item.id ~ '-320.webp') }} 320w,
-              {{ url_for('static', path='assets/images/gallery-' ~ item.id ~ '-480.webp') }} 480w,
-              {{ url_for('static', path='assets/images/gallery-' ~ item.id ~ '-640.webp') }} 640w"
-            sizes="(min-width: 48rem) 33vw, calc(50vw - 1.5rem)"
-            alt=""
-            width="640"
-            height="640"
-            loading="lazy"
-            decoding="async"
-          />
-          <figcaption class="gallery__caption">{{ item.name }}</figcaption>
-        </figure>
-      </li>
+        <li class="gallery__item">
+          <figure class="gallery__figure">
+            <img
+              class="gallery__img"
+              src="{{ url_for('static', path='assets/images/gallery-' ~ item.id ~ '-640.webp') }}"
+              srcset="
+                {{ url_for('static', path='assets/images/gallery-' ~ item.id ~ '-320.webp') }} 320w,
+                {{ url_for('static', path='assets/images/gallery-' ~ item.id ~ '-480.webp') }} 480w,
+                {{ url_for('static', path='assets/images/gallery-' ~ item.id ~ '-640.webp') }} 640w"
+              sizes="(min-width: 48rem) 33vw, calc(50vw - 1.5rem)"
+              alt="{{ item.name }}"
+              width="640"
+              height="640"
+              loading="lazy"
+              decoding="async"
+            />
+            <figcaption class="gallery__caption">
+              {{ item.name }}
+            </figcaption>
+          </figure>
+        </li>
       {% endfor %}
     </ul>
   </div>

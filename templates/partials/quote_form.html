@@ -1,12 +1,10 @@
 <section id="offert" class="section">
   <div class="container" style="max-width: 42rem">
     <div class="text-center" style="margin-bottom: 2rem">
-      <h2
-        style="font-weight: 800; font-size: 2.25rem; letter-spacing: -0.025em"
-      >
-        Begär Offert
-      </h2>
-      <p>Beskriv ditt projekt så återkommer vi oftast samma dag.</p>
+      <h2 style="font-size: 2.25rem">Begär Offert</h2>
+      <p class="muted">
+        Beskriv ditt projekt så återkommer vi oftast samma dag.
+      </p>
     </div>
 
     <form
@@ -16,6 +14,7 @@
       hx-post="/offert"
       hx-target="#form-response"
       hx-swap="innerHTML"
+      hx-disabled-elt="find button[type='submit']"
       enctype="multipart/form-data"
     >
       <!-- Honeypot -->
@@ -57,9 +56,9 @@
       </div>
 
       <div>
-        <label class="form-label" for="beskrivning"
-          >Vad behöver du hjälp med?</label
-        >
+        <label class="form-label" for="beskrivning">
+          Vad behöver du hjälp med?
+        </label>
         <textarea
           class="form-input"
           id="beskrivning"
@@ -70,7 +69,7 @@
       </div>
 
       <div>
-        <label class="form-label" for="bild">Bild (Valfritt)</label>
+        <label class="form-label" for="bild">Bild (valfritt)</label>
         <input
           class="form-input"
           type="file"
@@ -86,11 +85,11 @@
     </form>
 
     <p class="help" style="margin-top: 0.75rem; text-align: center">
-      Genom att skicka formuläret godkänner du att vi behandlar dina uppgifter
-      för att kunna återkomma med offert. Inga uppgifter används i
-      marknadsföringssyfte och delas inte med tredje part.
+      Genom att skicka formuläret godkänner du att vi behandlar dina
+      uppgifter för att kunna återkomma med offert. Inga uppgifter
+      används i marknadsföringssyfte och delas inte med tredje part.
     </p>
 
-    <div id="form-response" style="margin-top: 1rem"></div>
+    <div id="form-response" role="region" aria-live="polite" style="margin-top: 1rem"></div>
   </div>
 </section>

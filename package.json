@@ -1,0 +1,14 @@
+{
+  "name": "sandladanab",
+  "private": true,
+  "scripts": {
+    "css:build": "bunx @tailwindcss/cli -i static/css/app.css -o static/dist/styles.css --minify",
+    "css:watch": "bunx @tailwindcss/cli -i static/css/app.css -o static/dist/styles.css --watch",
+    "js:build": "bun build static/js/menu.js static/js/file-input.js --outdir static/dist --minify --target=browser",
+    "build": "bun run css:build && bun run js:build",
+    "dev": "bun run css:watch"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.1"
+  }
+}

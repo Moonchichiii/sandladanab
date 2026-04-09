@@ -1,16 +1,19 @@
-<!DOCTYPE html>
-<html lang="sv" class="h-full">
+{% from "macros/icons.html" import icon_phone %}
+<!doctype html>
+<html lang="sv">
   <head>
     <meta charset="utf-8" />
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
-    <!-- PWA / theming -->
+
+    <!-- PWA / Theming -->
     <meta name="theme-color" content="#0E1113" />
     <meta name="application-name" content="Sandlådan AB" />
     <meta name="apple-mobile-web-app-title" content="Sandlådan AB" />
     <meta name="color-scheme" content="dark" />
+
     <title>
       {% block title %}Sandlådan AB – Grävmaskinsjobb på västkusten{% endblock %}
     </title>
@@ -23,34 +26,40 @@
       href="{{ (BASE_URL or (request.url.scheme ~ '://' ~ request.url.netloc)) ~ '/' }}"
     />
 
-    <!-- Preload LCP -->
+    <!-- Preload: LCP Hero Image -->
     <link
       rel="preload"
       as="image"
       type="image/webp"
       imagesrcset="
-    {{ url_for('static', path='assets/images/hero-excavator-640.webp') }} 640w,
-    {{ url_for('static', path='assets/images/hero-excavator-1280.webp') }} 1280w,
-    {{ url_for('static', path='assets/images/hero-excavator-1920.webp') }} 1920w"
+        {{ url_for('static', path='assets/images/hero-excavator-640.webp') }} 640w,
+        {{ url_for('static', path='assets/images/hero-excavator-1280.webp') }} 1280w,
+        {{ url_for('static', path='assets/images/hero-excavator-1920.webp') }} 1920w"
       imagesizes="100vw"
       href="{{ url_for('static', path='assets/images/hero-excavator-1280.webp') }}"
       fetchpriority="high"
     />
 
-    <!-- Fonts -->
+    <!-- Preload: Fonts -->
     <link
       rel="preload"
-      href="/static/assets/fonts/Satoshi-Variable.woff2"
+      href="{{ url_for('static', path='assets/fonts/Satoshi-Variable.woff2') }}"
       as="font"
       type="font/woff2"
       crossorigin
     />
     <link
       rel="preload"
-      href="/static/assets/fonts/Author-Variable.woff2"
+      href="{{ url_for('static', path='assets/fonts/Author-Variable.woff2') }}"
       as="font"
       type="font/woff2"
       crossorigin
+    />
+
+    <!-- Styles (Tailwind 4.1 build output) -->
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', path='dist/styles.css') }}"
     />
 
     <!-- Favicon -->
@@ -60,720 +69,40 @@
     />
     <link rel="manifest" href="/site.webmanifest" />
 
-    <!-- CRITICAL CSS -->
-    <style>
-      /* --- 1. VARIABLES & FONTS --- */
-      :root {
-        --asfalt: #0e1113;
-        --grafit: #1b1e22;
-        --maskin: #f5b700;
-        --betong: #adb5bd;
-        --sand: #d6c7a6;
-        --white: #fff;
-        --container: 72rem;
-        --header-height: 4rem;
-      }
-
-      @font-face {
-        font-family: "Satoshi";
-        src: url("/static/assets/fonts/Satoshi-Variable.woff2") format("woff2");
-        font-weight: 300 900;
-        font-style: normal;
-        font-display: swap;
-        size-adjust: 102%;
-        ascent-override: 92%;
-        descent-override: 22%;
-      }
-      @font-face {
-        font-family: "Author";
-        src: url("/static/assets/fonts/Author-Variable.woff2") format("woff2");
-        font-weight: 300 900;
-        font-style: normal;
-        font-display: swap;
-        size-adjust: 98%;
-        ascent-override: 95%;
-        descent-override: 22%;
-      }
-
-      /* --- 2. RESET & BASE --- */
-      * {
-        box-sizing: border-box;
-      }
-      html {
-        height: 100%;
-        scroll-behavior: smooth;
-        scroll-padding-top: var(--header-height);
-        -webkit-text-size-adjust: 100%;
-      }
-      body {
-        margin: 0;
-        background: var(--asfalt);
-        color: var(--white);
-        font-family: "Satoshi", system-ui, sans-serif;
-        line-height: 1.6;
-        -webkit-font-smoothing: antialiased;
-        padding-top: var(--header-height);
-      }
-      img {
-        max-width: 100%;
-        height: auto;
-        display: block;
-      }
-      a {
-        color: inherit;
-        text-decoration: none;
-        transition: color 0.2s;
-      }
-
-      /* Typography */
-      h1,
-      h2,
-      h3 {
-        font-family: "Author", sans-serif;
-        line-height: 1.1;
-        margin: 0 0 0.5rem;
-        letter-spacing: -0.025em;
-        color: var(--white);
-      }
-      h1 {
-        font-size: clamp(2rem, 4vw, 3.5rem);
-        font-weight: 900;
-        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-      }
-      h2 {
-        font-weight: 800;
-      }
-      h3 {
-        font-size: 1.125rem;
-        font-weight: 700;
-      }
-      p {
-        margin: 0.5rem 0;
-      }
-      .muted {
-        color: var(--betong);
-      }
-
-      /* --- 3. UTILITIES & A11Y --- */
-      .container {
-        max-width: var(--container);
-        margin-inline: auto;
-        padding: 0 1rem;
-      }
-      .text-center {
-        text-align: center;
-      }
-      .sr-skip {
-        position: absolute;
-        left: -9999px;
-      }
-      .sr-skip:focus {
-        left: 0;
-        top: 0.5rem;
-        background: var(--maskin);
-        color: var(--asfalt);
-        padding: 0.5rem 0.75rem;
-        z-index: 1000;
-      }
-      .visually-hidden,
-      .sr-only {
-        position: absolute !important;
-        width: 1px;
-        height: 1px;
-        padding: 0;
-        margin: -1px;
-        overflow: hidden;
-        clip: rect(0, 0, 0, 0);
-        border: 0;
-      }
-
-      /* Focus States (WCAG: High Contrast Ring) */
-      :focus-visible {
-        outline: 3px solid var(--maskin);
-        outline-offset: 3px;
-      }
-
-      /* --- 4. HEADER & NAV --- */
-      .header {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        z-index: 70;
-        height: var(--header-height);
-        background: rgba(14, 17, 19, 0.85);
-        backdrop-filter: blur(12px);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
-        display: flex;
-        align-items: center;
-        padding-top: max(0px, env(safe-area-inset-top));
-      }
-      .header__inner {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        width: 100%;
-      }
-      .brand {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-weight: 800;
-        font-size: 1.125rem;
-        cursor: pointer;
-      }
-      .brand__dot {
-        width: 8px;
-        height: 8px;
-        background: var(--maskin);
-        border-radius: 50%;
-      }
-
-      /* Desktop Nav */
-      .nav-desktop {
-        display: none;
-        gap: 2rem;
-        align-items: center;
-      }
-
-      /* Shared Link Animation */
-      .nav-link,
-      .link-underline {
-        position: relative;
-        font-weight: 600;
-        color: rgba(255, 255, 255, 0.85);
-        padding-block: 0.25rem;
-      }
-      .nav-link:hover,
-      .link-underline:hover {
-        color: var(--white);
-      }
-      .nav-link::after,
-      .link-underline::after {
-        content: "";
-        position: absolute;
-        left: 0;
-        bottom: 0;
-        height: 2px;
-        width: 0;
-        background: var(--maskin);
-        transition: width 0.25s ease-out;
-      }
-      .nav-link:hover::after,
-      .link-underline:hover::after {
-        width: 100%;
-      }
-
-      /* Header Call Button */
-      .header__cta {
-        padding: 0.55rem 1rem !important;
-        font-size: 0.9rem !important;
-        box-shadow: 0 4px 12px rgba(245, 183, 0, 0.2) !important;
-      }
-
-      /* Mobile Nav Overlay */
-      .nav-mobile {
-        position: fixed;
-        inset: 0;
-        background: var(--asfalt);
-        z-index: 55;
-        padding: 6rem 1.5rem 2rem;
-        transform: translateX(100%);
-        transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        display: flex;
-        flex-direction: column;
-        gap: 1.5rem;
-      }
-      .nav-mobile[aria-hidden="false"] {
-        transform: translateX(0);
-      }
-      .nav-mobile a {
-        font-size: 1.5rem;
-        font-weight: 700;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-        padding-bottom: 1rem;
-      }
-
-      /* Hamburger */
-      .menu-toggle {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: none;
-        border: none;
-        padding: 0.25rem;
-        z-index: 60;
-        cursor: pointer;
-      }
-      .hamburger svg {
-        height: 2.25rem;
-        width: 2.25rem;
-        transition: transform 0.6s;
-      }
-      .line {
-        fill: none;
-        stroke: var(--white);
-        stroke-width: 3;
-        stroke-linecap: round;
-        transition: stroke-dasharray 0.6s, stroke-dashoffset 0.6s;
-      }
-      .line-top-bottom {
-        stroke-dasharray: 12 63;
-      }
-      .hamburger input {
-        display: none;
-      }
-      .hamburger input:checked + svg {
-        transform: rotate(-45deg);
-      }
-      .hamburger input:checked + svg .line-top-bottom {
-        stroke-dasharray: 20 300;
-        stroke-dashoffset: -32.42;
-      }
-
-      @media (min-width: 768px) {
-        .menu-toggle,
-        .nav-mobile {
-          display: none;
-        }
-        .nav-desktop {
-          display: flex;
-        }
-      }
-
-      /* --- 5. BUTTONS --- */
-      .btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 9999px;
-        padding: 0.75rem 1.25rem;
-        line-height: 1;
-        font-weight: 700;
-        border: 1px solid transparent;
-        cursor: pointer;
-        transition: transform 0.15s, filter 0.15s, background 0.15s;
-        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
-      }
-      .btn:active {
-        transform: translateY(0);
-      }
-      .btn--primary {
-        background: linear-gradient(180deg, #f8c300, #f0b200);
-        color: var(--asfalt);
-        box-shadow: 0 8px 20px rgba(245, 183, 0, 0.25),
-          inset 0 0 0 1px rgba(0, 0, 0, 0.05);
-      }
-      .btn--primary:hover {
-        transform: translateY(-1px);
-        filter: brightness(1.05);
-      }
-      .btn--ghost {
-        background: rgba(255, 255, 255, 0.06);
-        border-color: rgba(255, 255, 255, 0.12);
-        color: var(--white);
-      }
-      .btn--ghost:hover {
-        background: rgba(255, 255, 255, 0.1);
-        transform: translateY(-1px);
-      }
-      .btn--icon {
-        gap: 0.5rem;
-      }
-
-      /* --- 6. SECTIONS & CARDS --- */
-      .section {
-        padding: 4rem 0;
-      }
-      .page-pad {
-        padding: 3rem 0;
-      }
-
-      .cards {
-        list-style: none;
-        padding: 0;
-        margin: 1.25rem 0 0;
-        display: grid;
-        gap: 1rem;
-        content-visibility: auto;
-        contain-intrinsic-size: 1px 600px;
-      }
-      .card {
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 14px;
-        padding: 1.25rem;
-        transition: background 0.15s, transform 0.15s;
-      }
-      .card:hover {
-        transform: translateY(-2px);
-        background: rgba(255, 255, 255, 0.06);
-      }
-      @media (min-width: 48rem) {
-        .cards {
-          grid-template-columns: repeat(3, 1fr);
-        }
-      }
-
-      /* --- 7. HERO --- */
-      .hero {
-        position: relative;
-        min-height: 75svh; /* Better default for mobile */
-        display: flex;
-        align-items: center;
-        overflow: hidden;
-      }
-      .hero__bg {
-        position: absolute;
-        inset: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-      }
-      .hero__overlay {
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(
-          180deg,
-          rgba(14, 17, 19, 0.4) 0%,
-          rgba(14, 17, 19, 0.8) 60%,
-          rgba(14, 17, 19, 1) 100%
-        );
-      }
-      .hero__content {
-        position: relative;
-        z-index: 1;
-        max-width: 46rem;
-        padding-top: 2rem;
-      }
-      .hero h1 {
-        line-height: 1.05;
-        letter-spacing: -0.03em;
-        margin-bottom: 1rem;
-      }
-      .lead {
-        margin-top: 0;
-        color: var(--sand);
-        font-weight: 500;
-        font-size: 1.125rem;
-        max-width: 36ch;
-        text-wrap: balance;
-      }
-
-      /* Stack / Buttons */
-      .stack {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 1rem;
-        margin-top: 2rem;
-      }
-
-      /* Status Pill (Glass) */
-      .pill {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.75rem;
-        border-radius: 12px;
-        padding: 0.85rem 1.25rem;
-        margin-top: 2rem;
-        font-size: 0.95rem;
-        line-height: 1.4;
-        color: rgba(255, 255, 255, 0.95);
-        background: rgba(255, 255, 255, 0.08);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-        width: fit-content;
-        max-width: 100%;
-        min-height: 3.5rem;
-      }
-
-      /* --- 8. GALLERY --- */
-      .gallery {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 0.75rem;
-        padding: 0;
-        margin: 1.5rem 0 0;
-        list-style: none;
-      }
-      .gallery__figure {
-        position: relative;
-        margin: 0;
-        overflow: hidden;
-        border-radius: 14px;
-        aspect-ratio: 1;
-        background: rgba(255, 255, 255, 0.06);
-        cursor: pointer;
-        isolation: isolate;
-      }
-      .gallery__img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform 0.5s;
-      }
-      .gallery__figure::after {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(
-          to top,
-          rgba(14, 17, 19, 0.95) 0%,
-          rgba(14, 17, 19, 0.6) 30%,
-          transparent 60%
-        );
-        pointer-events: none;
-        z-index: 1;
-      }
-      .gallery__caption {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        padding: 0.75rem;
-        font-weight: 700;
-        font-size: 0.9rem;
-        color: #fff;
-        z-index: 2;
-        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
-      }
-      @media (hover: hover) {
-        .gallery__caption {
-          opacity: 0;
-          transform: translateY(10px);
-          transition: 0.3s ease;
-        }
-        .gallery__figure::after {
-          opacity: 0;
-          transition: 0.3s ease;
-        }
-        .gallery__figure:hover .gallery__caption {
-          opacity: 1;
-          transform: translateY(0);
-        }
-        .gallery__figure:hover::after {
-          opacity: 1;
-        }
-        .gallery__figure:hover .gallery__img {
-          transform: scale(1.08);
-        }
-      }
-      @media (min-width: 48rem) {
-        .gallery {
-          grid-template-columns: repeat(3, 1fr);
-          gap: 1rem;
-        }
-      }
-
-      /* --- 9. FORM --- */
-      .form {
-        display: grid;
-        gap: 1rem;
-        width: 100%;
-        max-width: 40rem;
-        margin-inline: auto;
-        background: rgba(255, 255, 255, 0.065);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        border-radius: 14px;
-        padding: 1.25rem;
-        box-shadow: 0 6px 22px rgba(0, 0, 0, 0.25);
-      }
-      .form-label {
-        display: block;
-        margin-bottom: 0.4rem;
-        font-weight: 500;
-        font-size: 0.9rem;
-      }
-      .form-input {
-        width: 100%;
-        background: #25292e;
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        color: white;
-        padding: 0.8rem;
-        border-radius: 12px;
-        font-size: 1rem;
-      }
-      .form-input:focus {
-        outline: 2px solid var(--maskin);
-        border-color: transparent;
-      }
-      .form-input[type="file"]::file-selector-button {
-        margin-right: 0.75rem;
-        border-radius: 999px;
-        padding: 0.5rem 0.9rem;
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        background: rgba(255, 255, 255, 0.06);
-        color: #fff;
-        cursor: pointer;
-      }
-
-      /* --- 10. FOOTER --- */
-      .footer {
-        border-top: 1px solid rgba(255, 255, 255, 0.08);
-        background: rgba(255, 255, 255, 0.02);
-      }
-      .footer__grid {
-        display: grid;
-        gap: 1.5rem;
-        padding: 2.25rem 0 1.25rem;
-      }
-      .footer__links {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        display: grid;
-        gap: 0.5rem;
-      }
-      .footer__bar {
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
-        padding: 1.5rem 0;
-        text-align: center;
-      }
-      .footer__bar a {
-        color: var(--white);
-        font-weight: 700;
-        opacity: 0.9;
-        transition: color 0.2s;
-        text-decoration: none;
-      }
-      .footer__bar a:hover {
-        color: var(--maskin);
-        text-decoration: underline;
-        text-decoration-thickness: 2px;
-      }
-      @media (min-width: 48rem) {
-        .footer__grid {
-          grid-template-columns: repeat(3, 1fr);
-        }
-      }
-
-      /* --- 11. MOBILE POLISH (Max 640px) --- */
-      @media (max-width: 640px) {
-        .container {
-          padding-inline: 1.25rem;
-        }
-
-        /* Reduced from 2.75rem to tighter 2rem for better flow */
-        .section {
-          padding: 2rem 0;
-        }
-
-        .hero {
-          /* Decreased height slightly so next section peeks */
-          min-height: 75svh;
-          align-items: flex-end;
-          /* Tighter bottom padding to close the gap */
-          padding-bottom: 2.5rem;
-        }
-        .hero__content {
-          padding-bottom: 0; /* Remove extra padding here */
-          max-width: 30rem;
-        }
-        .hero__overlay {
-          background: linear-gradient(
-            to bottom,
-            rgba(14, 17, 19, 0.3) 0%,
-            rgba(14, 17, 19, 0.7) 40%,
-            rgba(14, 17, 19, 1) 90%
-          );
-        }
-        .hero h1 {
-          font-size: 2.75rem;
-        }
-
-        .stack {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 0.75rem;
-          width: 100%;
-          margin-top: 1.5rem;
-        }
-        .btn {
-          width: 100%;
-          padding: 0.9rem 1rem;
-          font-size: 1rem;
-        }
-
-        .pill {
-          width: 100%;
-          margin-top: 1.5rem;
-          justify-content: flex-start;
-          text-align: left;
-          font-size: 0.875rem;
-        }
-
-        .cards {
-          gap: 0.9rem;
-          margin-top: 1rem;
-          justify-items: center;
-        }
-        .card {
-          width: 100%;
-          max-width: 26rem;
-          border-radius: 16px;
-          padding: 1.1rem;
-        }
-        .header {
-          backdrop-filter: none;
-        }
-        .footer__grid,
-        .footer__links {
-          text-align: center;
-          justify-items: center;
-        }
-        #tjanster,
-        #galleri,
-        #offert {
-          scroll-margin-top: 64px;
-        }
-      }
-
-      @media (prefers-reduced-motion: reduce) {
-        *, :before, :after {
-          animation-duration: 0s !important;
-          transition-duration: 0s !important;
-        }
-      }
-    </style>
-    <!-- SEO: Local Business Schema -->
-   <script type="application/ld+json" nonce="{{ csp_nonce(request) }}">
-{{ schema_json | safe }}
-</script>
-
+    <!-- Schema.org -->
+    <script
+      type="application/ld+json"
+      nonce="{{ csp_nonce(request) }}"
+    >
+      {{ schema_json | safe }}
+    </script>
   </head>
 
-  <body class="min-h-full">
+  <body>
     <a id="top" tabindex="-1"></a>
     <a href="#main" class="sr-skip">Hoppa till innehåll</a>
 
-    <!-- HEADER -->
+    {# ── Header ──────────────────────────────────── #}
     <header class="header">
       <div class="container header__inner">
-        <a href="#top" class="brand" aria-label="Till toppen">
-          <span class="brand__dot"></span> SANDLÅDAN AB
+        <a href="#top" class="brand" aria-label="Till toppen – Sandlådan AB">
+          <span class="brand__dot" aria-hidden="true"></span>
+          SANDLÅDAN AB
         </a>
 
         <!-- Desktop Nav -->
         <nav class="nav-desktop" aria-label="Huvudmeny">
-          <a href="#tjanster" class="nav-link">Tjänster</a>
-          <a href="#galleri" class="nav-link">Galleri</a>
-          <a href="#offert" class="nav-link">Offert</a>
-          <a href="tel:{{ owner_phone }}" class="btn btn--primary btn--icon">
-            <!-- Icon: Phone -->
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-            >
-              <path
-                d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24c1.12.37 2.33.57 3.58.57a1 1 0 011 1V20a1 1 0 01-1 1C10.3 21 3 13.7 3 4a1 1 0 011-1h3.5a1 1 0 011 1c0 1.25.2 2.46.57 3.58a1 1 0 01-.25 1.01l-2.2 2.2z"
-              />
-            </svg>
+          {% for link in nav_links %}
+            <a href="{{ link.href }}" class="nav-link">
+              {{ link.label }}
+            </a>
+          {% endfor %}
+          <a
+            href="tel:{{ owner_phone }}"
+            class="btn btn--primary btn--icon header__cta"
+            aria-label="Ring {{ owner_phone }}"
+          >
+            {{ icon_phone(18) }}
             <span>Ring direkt</span>
           </a>
         </nav>
@@ -800,7 +129,7 @@
       </div>
     </header>
 
-    <!-- MOBILE NAV OVERLAY -->
+    {# ── Mobile Nav Overlay ──────────────────────── #}
     <nav
       id="mobile-menu"
       class="nav-mobile"
@@ -808,36 +137,20 @@
       aria-label="Mobilmeny"
       inert
     >
-      <a href="#tjanster">Tjänster</a>
-      <a href="#galleri">Galleri</a>
-      <a href="#offert">Begär Offert</a>
+      {% for link in nav_links %}
+        <a href="{{ link.href }}">{{ link.label }}</a>
+      {% endfor %}
       <a
         href="tel:{{ owner_phone }}"
-        class="btn btn--primary header__cta btn--icon"
+        class="btn btn--primary btn--icon header__cta"
         aria-label="Ring direkt"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          width="18"
-          height="18"
-          aria-hidden="true"
-          focusable="false"
-        >
-          <path
-            fill="currentColor"
-            d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1
-      1 0 011.01-.24c1.12.37 2.33.57 3.58.57a1
-      1 0 011 1V20a1 1 0 01-1 1C10.3 21
-      3 13.7 3 4a1 1 0 011-1h3.5a1
-      1 0 011 1c0 1.25.2 2.46.57 3.58a1
-      1 0 01-.25 1.01l-2.2 2.2z"
-          />
-        </svg>
+        {{ icon_phone(18) }}
         <span>Ring direkt</span>
       </a>
     </nav>
 
+    {# ── Page Content ────────────────────────────── #}
     {% block hero %}{% endblock %}
 
     <main id="main" class="container page-pad">
@@ -846,18 +159,19 @@
 
     {% include "partials/footer.html" %}
 
+    {# ── Scripts ─────────────────────────────────── #}
     <script
       src="{{ url_for('static', path='vendor/htmx.min.js') }}"
       defer
       nonce="{{ csp_nonce(request) }}"
     ></script>
     <script
-      src="{{ url_for('static', path='file-input.js') }}"
+      src="{{ url_for('static', path='js/file-input.js') }}"
       defer
       nonce="{{ csp_nonce(request) }}"
     ></script>
     <script
-      src="{{ url_for('static', path='menu.js') }}"
+      src="{{ url_for('static', path='js/menu.js') }}"
       defer
       nonce="{{ csp_nonce(request) }}"
     ></script>

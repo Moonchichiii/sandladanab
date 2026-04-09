@@ -135,3 +135,5 @@ temp/
 *.swp
 *.swo
 *~
+.env
+.env.example

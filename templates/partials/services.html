@@ -1,25 +1,13 @@
 <section class="section" aria-labelledby="tjanster">
-  <!-- Container padding is now handled globally in Base.html mobile block -->
   <div class="container">
     <h2 id="tjanster">Tjänster</h2>
 
-    {% set services = [ {"title": "Schakt & markplanering", "description":
-    "Noggrant utfört med rätt lutningar och masshantering."}, {"title":
-    "Dränering", "description": "Fuktproblem förebyggs med korrekt
-    dimensionerade lösningar."}, {"title": "Fiber-/rör-diken", "description":
-    "Precision och dokumentation enligt beställarens krav."}, {"title":
-    "Grävning", "description": "Grundläggning, poolgravar och större
-    markarbeten."}, {"title": "Mindre rivning", "description": "Vi tar hand om
-    rivning av plattor, fundament och murar."}, {"title": "Maskinuthyrning",
-    "description": "Kvalificerad förare medföljer alltid."} ] %}
-
-    <!-- Class "cards" in Base.html handles grid on desktop and stacked centered look on mobile -->
-    <ul class="cards">
+    <ul class="cards" role="list">
       {% for s in services %}
-      <li class="card">
-        <h3>{{ s.title }}</h3>
-        <p class="muted">{{ s.description }}</p>
-      </li>
+        <li class="card">
+          <h3>{{ s.title }}</h3>
+          <p class="muted">{{ s.description }}</p>
+        </li>
       {% endfor %}
     </ul>
   </div>
