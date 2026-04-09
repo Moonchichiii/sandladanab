@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     debug: bool = False
     maintenance_mode: bool = False
 
-    # ── Security (raw comma-separated strings) ───────
+    # ── Security ─────────────────────────────────────
     allowed_hosts: str = ""
     cors_origins: str = "http://localhost:8000,http://127.0.0.1:8000"
     hsts_enable: bool = False
@@ -47,18 +47,20 @@ class Settings(BaseSettings):
     availability_weeks_ahead: int = 6
     status_cache_ttl: int = 1800
     lediga_text: str = (
-        "Tillgänglig för uppdrag • Snabbt platsbesök i Göteborg med omnejd"
+        "Tillgänglig för uppdrag \u2022 Snabbt platsbesök i Göteborg med omnejd"
     )
 
     # ── Google Calendar (optional) ───────────────────
     gcal_service_account_json_path: str = ""
     gcal_calendar_id: str = ""
 
+    # ── Cloudinary ───────────────────────────────────
+    cloudinary_cloud: str = ""  # e.g. "dxxxxxx"
+
     # ── Parsed properties ────────────────────────────
 
     @property
     def allowed_hosts_list(self) -> list[str]:
-        """Parse comma-separated hosts, strip protocols/ports."""
         if not self.allowed_hosts:
             return []
         result: list[str] = []
@@ -77,7 +79,6 @@ class Settings(BaseSettings):
 
     @property
     def cors_origins_list(self) -> list[str]:
-        """Parse comma-separated origins, ensure https:// prefix."""
         if not self.cors_origins:
             return []
         result: list[str] = []

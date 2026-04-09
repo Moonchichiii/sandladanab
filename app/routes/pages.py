@@ -85,7 +85,13 @@ async def index(request: Request):
     }
 
     template = "maintenance.html" if settings.maintenance_mode else "index.html"
-    return templates.TemplateResponse(template, ctx)
+
+    # Starlette 1.0+ API: request first, then name, then context
+    return templates.TemplateResponse(
+        request=request,
+        name=template,
+        context=ctx,
+    )
 
 
 @router.get("/robots.txt", response_class=PlainTextResponse)
