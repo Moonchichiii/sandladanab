@@ -6,12 +6,11 @@
 @theme {
     --font-sans: "Satoshi", system-ui, sans-serif;
     --font-display: "Author", sans-serif;
-    --color-asfalt: #0e1113;
-    --color-grafit: #1b1e22;
-    --color-maskin: #f5b700;
-    --color-maskin-light: #f8c300;
-    --color-maskin-dark: #f0b200;
-    --color-betong: #adb5bd;
+    --color-asfalt: #000000;
+    --color-grafit: #0a0a0a;
+    --color-maskin: #ff5c00;
+    --color-maskin-light: #ff7b2a;
+    --color-maskin-dark: #e65100;
     --color-sand: #d6c7a6;
     --color-surface: rgba(255, 255, 255, 0.03);
     --color-border: rgba(255, 255, 255, 0.1);

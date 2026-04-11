@@ -158,3 +158,7 @@ async def offert(
         f"<p><strong>Tack {safe['namn']}!</strong></p>"
         f"<p>Vi aterkommer pa {safe['tel']}.</p>",
     )
+
+@router.get("/health")
+async def health():
+    return {"status": "ok", "version": "1.0.0"}
