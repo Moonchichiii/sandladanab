@@ -223,3 +223,32 @@ async def debug_serve_css():
             content=css_path.read_bytes(), media_type="text/css"
         )
     return {"error": "not found", "path": str(css_path)}
+
+
+@router.get("/debug/dist")
+async def debug_dist():
+    import os
+    from pathlib import Path
+
+    static_dir = Path(__file__).resolve().parent.parent.parent / "static"
+    dist_dir = static_dir / "dist"
+
+    files = {}
+    if dist_dir.exists():
+        for f in dist_dir.iterdir():
+            files[f.name] = {
+                "size": f.stat().st_size,
+                "is_file": f.is_file(),
+                "is_symlink": f.is_symlink(),
+                "readable": os.access(f, os.R_OK),
+                "mode": oct(f.stat().st_mode),
+            }
+
+    return {
+        "dist_dir": str(dist_dir),
+        "exists": dist_dir.exists(),
+        "is_dir": dist_dir.is_dir(),
+        "is_symlink": dist_dir.is_symlink(),
+        "parent_is_symlink": static_dir.is_symlink(),
+        "files": files,
+    }
