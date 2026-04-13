@@ -1,5 +1,5 @@
 from __future__ import annotations
-import pathlib
+
 from typing import Annotated
 
 from fastapi import (
@@ -20,7 +20,9 @@ router = APIRouter(prefix="/api", tags=["api"])
 
 # ── Constants ────────────────────────────────────────
 _MAX_UPLOAD_BYTES = 10 * 1024 * 1024  # 10 MB
-_ALLOWED_MIME = frozenset({"image/jpeg", "image/png", "image/webp", "image/avif"})
+_ALLOWED_MIME = frozenset(
+    {"image/jpeg", "image/png", "image/webp", "image/avif"}
+)
 _FALLBACK_DASH = "-"
 
 
@@ -36,8 +38,9 @@ def _esc(s: str | None) -> str:
 
 
 def _html(css: str, role: str, body: str) -> HTMLResponse:
-    """Tiny helper to avoid repeating notice markup."""
-    return HTMLResponse(f'<div class="notice notice--{css}" role="{role}">{body}</div>')
+    return HTMLResponse(
+        f'<div class="notice notice--{css}" role="{role}">{body}</div>'
+    )
 
 
 # ── Status pill (HTMX partial) ──────────────────────
@@ -66,7 +69,7 @@ async def offert(
     telefon: Annotated[str, Form()],
     epost: Annotated[str | None, Form()] = None,
     beskrivning: Annotated[str | None, Form()] = None,
-    website: Annotated[str | None, Form()] = None,  # honeypot
+    website: Annotated[str | None, Form()] = None,
     bild: UploadFile | None = None,
 ) -> HTMLResponse:
     ip = request.client.host if request.client else "unknown"
@@ -77,8 +80,8 @@ async def offert(
             _html(
                 "err",
                 "alert",
-                "<p><strong>For manga forfragningar.</strong> "
-                "Vanta en stund och forsok igen.</p>",
+                "<p><strong>För många förfrågningar.</strong> "
+                "Vänta en stund och försök igen.</p>",
             ).body.decode(),
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
         )
@@ -88,7 +91,7 @@ async def offert(
         return _html(
             "ok",
             "status",
-            "<p><strong>Tack!</strong> Din forfragan ar mottagen.</p>",
+            "<p><strong>Tack!</strong> Din förfrågan är mottagen.</p>",
         )
 
     # ── Validation ───────────────────────────────
@@ -101,12 +104,11 @@ async def offert(
     if not telefon_clean:
         errors.append("Ange ditt telefonnummer.")
 
-    # Validate upload before reading into memory
     if bild and bild.filename:
         if bild.content_type not in _ALLOWED_MIME:
             errors.append("Bara bilder (JPEG, PNG, WebP, AVIF).")
         if bild.size and bild.size > _MAX_UPLOAD_BYTES:
-            errors.append("Bilden far vara max 10 MB.")
+            errors.append("Bilden får vara max 10 MB.")
 
     if errors:
         lis = "".join(f"<li>{e}</li>" for e in errors)
@@ -128,9 +130,9 @@ async def offert(
         "desc": _esc(beskrivning) or _FALLBACK_DASH,
     }
 
-    subject = f"[Sandladan AB] Ny forfragan fran {safe['namn']}"
+    subject = f"[Sandladan AB] Ny förfrågan från {safe['namn']}"
     body_html = (
-        "<h2>Ny forfragan</h2>"
+        "<h2>Ny förfrågan</h2>"
         f"<p><strong>Namn:</strong> {safe['namn']}</p>"
         f"<p><strong>Tel:</strong> {safe['tel']}</p>"
         f"<p><strong>E-post:</strong> {safe['epost']}</p>"
@@ -156,175 +158,10 @@ async def offert(
         "ok",
         "status",
         f"<p><strong>Tack {safe['namn']}!</strong></p>"
-        f"<p>Vi aterkommer pa {safe['tel']}.</p>",
+        f"<p>Vi återkommer på {safe['tel']}.</p>",
     )
+
 
 @router.get("/health")
 async def health():
     return {"status": "ok", "version": "1.0.0"}
-
-@router.get("/debug/static")
-async def debug_static():
-    import os
-    from pathlib import Path
-
-    static_dir = Path(__file__).resolve().parent.parent.parent / "static"
-    result = {
-        "static_dir": str(static_dir),
-        "exists": static_dir.exists(),
-        "dist_exists": (static_dir / "dist").exists(),
-        "files": [],
-    }
-    if static_dir.exists():
-        for root, dirs, files in os.walk(static_dir):
-            for f in files:
-                full = os.path.join(root, f)
-                result["files"].append(
-                    {
-                        "path": os.path.relpath(full, static_dir),
-                        "size": os.path.getsize(full),
-                    }
-                )
-    return result
-
-
-@router.get("/debug/routes")
-async def debug_routes(request: Request):
-    routes_info = []
-    for route in request.app.routes:
-        info = {
-            "type": type(route).__name__,
-            "path": getattr(route, "path", "N/A"),
-        }
-        if hasattr(route, "app"):
-            info["app_type"] = type(route.app).__name__
-            if hasattr(route.app, "directory"):
-                info["directory"] = str(route.app.directory)
-        if hasattr(route, "name"):
-            info["name"] = route.name
-        routes_info.append(info)
-    return {"routes": routes_info}
-
-
-@router.get("/debug/serve-css")
-async def debug_serve_css():
-    from pathlib import Path
-
-    from fastapi.responses import Response
-
-    css_path = (
-        Path(__file__).resolve().parent.parent.parent
-        / "static"
-        / "dist"
-        / "styles.css"
-    )
-    if css_path.exists():
-        return Response(
-            content=css_path.read_bytes(), media_type="text/css"
-        )
-    return {"error": "not found", "path": str(css_path)}
-
-
-@router.get("/debug/dist")
-async def debug_dist():
-    import os
-    from pathlib import Path
-
-    static_dir = Path(__file__).resolve().parent.parent.parent / "static"
-    dist_dir = static_dir / "dist"
-
-    files = {}
-    if dist_dir.exists():
-        for f in dist_dir.iterdir():
-            files[f.name] = {
-                "size": f.stat().st_size,
-                "is_file": f.is_file(),
-                "is_symlink": f.is_symlink(),
-                "readable": os.access(f, os.R_OK),
-                "mode": oct(f.stat().st_mode),
-            }
-
-    return {
-        "dist_dir": str(dist_dir),
-        "exists": dist_dir.exists(),
-        "is_dir": dist_dir.is_dir(),
-        "is_symlink": dist_dir.is_symlink(),
-        "parent_is_symlink": static_dir.is_symlink(),
-        "files": files,
-    }
-
-
-
-@router.get("/debug/static-check")
-async def debug_static_check():
-    import os
-
-    static_dir = str(
-        pathlib.Path(__file__).resolve().parent.parent.parent / "static"
-    )
-    target = os.path.join(static_dir, "dist", "styles.css")
-
-    return {
-        "static_dir": static_dir,
-        "static_dir_realpath": os.path.realpath(static_dir),
-        "static_dir_abspath": os.path.abspath(static_dir),
-        "target_exists": os.path.exists(target),
-        "target_realpath": os.path.realpath(target),
-        "target_abspath": os.path.abspath(target),
-        "realpath_starts_with_realpath": os.path.realpath(target).startswith(
-            os.path.realpath(static_dir)
-        ),
-        "abspath_starts_with_abspath": os.path.abspath(target).startswith(
-            os.path.abspath(static_dir)
-        ),
-        "dist_is_symlink": os.path.islink(
-            os.path.join(static_dir, "dist")
-        ),
-        "static_is_symlink": os.path.islink(static_dir),
-        "parent_dirs_symlinks": {
-            "/opt/render": os.path.islink("/opt/render"),
-            "/opt/render/project": os.path.islink("/opt/render/project"),
-            "/opt/render/project/src": os.path.islink(
-                "/opt/render/project/src"
-            ),
-        },
-        "dist_contents": os.listdir(
-            os.path.join(static_dir, "dist")
-        )
-        if os.path.isdir(os.path.join(static_dir, "dist"))
-        else "NOT A DIR",
-    }
-
-
-
-@router.get("/debug/lookup")
-async def debug_lookup(request: Request):
-    from starlette.staticfiles import StaticFiles
-
-    for route in request.app.routes:
-        if hasattr(route, "app") and isinstance(route.app, StaticFiles):
-            static_app = route.app
-            path = "dist/styles.css"
-            full_path, stat_result = await static_app.lookup_path(path)
-            return {
-                "lookup_result": {
-                    "full_path": full_path,
-                    "stat_found": stat_result is not None,
-                },
-                "instance_info": {
-                    "directory": str(static_app.directory),
-                    "all_directories": [
-                        str(d) for d in static_app.all_directories
-                    ],
-                    "follow_symlink": static_app.follow_symlink,
-                },
-                "comparison": {
-                    "css_lookup": str(
-                        await static_app.lookup_path("css/app.css")
-                    ),
-                    "dist_lookup": str(
-                        await static_app.lookup_path("dist/styles.css")
-                    ),
-                },
-            }
-    return {"error": "StaticFiles mount not found"}
