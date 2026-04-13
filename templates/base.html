@@ -57,10 +57,7 @@
     />
 
     <!-- Styles (Tailwind 4.1 build output) -->
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', path='dist/styles.css') }}"
-    />
+    <link rel="stylesheet" href="/dist/styles.css" />
 
     <!-- Favicon -->
     <link
@@ -166,12 +163,12 @@
       nonce="{{ csp_nonce(request) }}"
     ></script>
     <script
-      src="{{ url_for('static', path='dist/file-input.js') }}"
+      src="/dist/file-input.js"
       defer
       nonce="{{ csp_nonce(request) }}"
     ></script>
     <script
-      src="{{ url_for('static', path='dist/menu.js') }}"
+      src="/dist/menu.js"
       defer
       nonce="{{ csp_nonce(request) }}"
     ></script>

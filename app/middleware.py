@@ -82,7 +82,10 @@ def register_middleware(app: FastAPI) -> None:
     @app.middleware("http")
     async def static_cache(request: Request, call_next):
         response: Response = await call_next(request)
-        if request.url.path.startswith("/static/") and response.status_code < 400:
+        path = request.url.path
+        if (
+            path.startswith("/static/") or path.startswith("/dist/")
+        ) and response.status_code < 400:
             response.headers.setdefault(
                 "Cache-Control",
                 "public, max-age=31536000, immutable",
