@@ -1,5 +1,5 @@
 from __future__ import annotations
-
+import pathlib
 from typing import Annotated
 
 from fastapi import (
@@ -251,4 +251,46 @@ async def debug_dist():
         "is_symlink": dist_dir.is_symlink(),
         "parent_is_symlink": static_dir.is_symlink(),
         "files": files,
+    }
+
+
+
+@router.get("/debug/static-check")
+async def debug_static_check():
+    import os
+
+    static_dir = str(
+        pathlib.Path(__file__).resolve().parent.parent.parent / "static"
+    )
+    target = os.path.join(static_dir, "dist", "styles.css")
+
+    return {
+        "static_dir": static_dir,
+        "static_dir_realpath": os.path.realpath(static_dir),
+        "static_dir_abspath": os.path.abspath(static_dir),
+        "target_exists": os.path.exists(target),
+        "target_realpath": os.path.realpath(target),
+        "target_abspath": os.path.abspath(target),
+        "realpath_starts_with_realpath": os.path.realpath(target).startswith(
+            os.path.realpath(static_dir)
+        ),
+        "abspath_starts_with_abspath": os.path.abspath(target).startswith(
+            os.path.abspath(static_dir)
+        ),
+        "dist_is_symlink": os.path.islink(
+            os.path.join(static_dir, "dist")
+        ),
+        "static_is_symlink": os.path.islink(static_dir),
+        "parent_dirs_symlinks": {
+            "/opt/render": os.path.islink("/opt/render"),
+            "/opt/render/project": os.path.islink("/opt/render/project"),
+            "/opt/render/project/src": os.path.islink(
+                "/opt/render/project/src"
+            ),
+        },
+        "dist_contents": os.listdir(
+            os.path.join(static_dir, "dist")
+        )
+        if os.path.isdir(os.path.join(static_dir, "dist"))
+        else "NOT A DIR",
     }
