@@ -91,9 +91,8 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-# Tailwind builds (commit source, ignore compiled)
-static/styles.css
-static/styles.css.map
+# Tailwind builds (only ignore source maps)
+static/dist/*.map
 
 # If you generate other asset bundles, ignore them too:
 public/build/
@@ -135,5 +134,4 @@ temp/
 *.swp
 *.swo
 *~
-.env
 .env.example
