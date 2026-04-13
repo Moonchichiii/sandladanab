@@ -2,42 +2,48 @@
 
 import sys
 from pathlib import Path
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import JSONResponse
-from app import create_app
 
-# Create app
+from fastapi.staticfiles import StaticFiles
+
+from app import create_app
+from app.config import settings
+
 app = create_app()
 
-# Mount static files with absolute path
+# ── Static files ─────────────────────────────────────
 STATIC_DIR = Path(__file__).resolve().parent / "static"
-print(f"🔍 STATIC_DIR resolved to: {STATIC_DIR}", file=sys.stderr)
-print(f"🔍 STATIC_DIR exists: {STATIC_DIR.exists()}", file=sys.stderr)
 
 if not STATIC_DIR.exists():
-    raise RuntimeError(f"❌ Static directory not found: {STATIC_DIR}")
+    raise RuntimeError(f"Static directory not found: {STATIC_DIR}")
 
-# Mount static files
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
-print("✅ Static files mounted successfully", file=sys.stderr)
 
-# Debug endpoint to verify filesystem
-@app.get("/debug/static")
-async def debug_static():
-    return {
-        "static_dir": str(STATIC_DIR),
-        "exists": STATIC_DIR.exists(),
-        "files": [str(p.relative_to(STATIC_DIR)) for p in STATIC_DIR.rglob("*") if p.is_file()]
-    }
 
-# Debug endpoint to check routes
-@app.get("/debug/routes")
-async def debug_routes():
-    routes = []
-    for route in app.routes:
-        routes.append({
-            "path": route.path,
-            "name": route.name,
-            "methods": getattr(route, "methods", None)
-        })
-    return routes
+# ── Debug endpoints (only when DEBUG=true) ───────────
+if settings.debug:
+
+    @app.get("/debug/static")
+    async def debug_static():
+        return {
+            "static_dir": str(STATIC_DIR),
+            "exists": STATIC_DIR.exists(),
+            "files": [
+                str(p.relative_to(STATIC_DIR))
+                for p in STATIC_DIR.rglob("*")
+                if p.is_file()
+            ],
+        }
+
+    @app.get("/debug/routes")
+    async def debug_routes():
+        return [
+            {
+                "path": route.path,
+                "name": route.name,
+                "methods": getattr(route, "methods", None),
+            }
+            for route in app.routes
+        ]
+
+    print(f"🔍 STATIC_DIR: {STATIC_DIR}", file=sys.stderr)
+    print("✅ Debug endpoints enabled at /debug/static and /debug/routes", file=sys.stderr)
