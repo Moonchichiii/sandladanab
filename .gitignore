@@ -31,7 +31,6 @@ __pycache__/
 
 # Packaging / builds
 build/
-dist/
 .eggs/
 *.egg-info/
 pip-wheel-metadata/
