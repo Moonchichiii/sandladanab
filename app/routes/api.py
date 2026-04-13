@@ -294,3 +294,37 @@ async def debug_static_check():
         if os.path.isdir(os.path.join(static_dir, "dist"))
         else "NOT A DIR",
     }
+
+
+
+@router.get("/debug/lookup")
+async def debug_lookup(request: Request):
+    from starlette.staticfiles import StaticFiles
+
+    for route in request.app.routes:
+        if hasattr(route, "app") and isinstance(route.app, StaticFiles):
+            static_app = route.app
+            path = "dist/styles.css"
+            full_path, stat_result = await static_app.lookup_path(path)
+            return {
+                "lookup_result": {
+                    "full_path": full_path,
+                    "stat_found": stat_result is not None,
+                },
+                "instance_info": {
+                    "directory": str(static_app.directory),
+                    "all_directories": [
+                        str(d) for d in static_app.all_directories
+                    ],
+                    "follow_symlink": static_app.follow_symlink,
+                },
+                "comparison": {
+                    "css_lookup": str(
+                        await static_app.lookup_path("css/app.css")
+                    ),
+                    "dist_lookup": str(
+                        await static_app.lookup_path("dist/styles.css")
+                    ),
+                },
+            }
+    return {"error": "StaticFiles mount not found"}
