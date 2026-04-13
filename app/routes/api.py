@@ -162,3 +162,27 @@ async def offert(
 @router.get("/health")
 async def health():
     return {"status": "ok", "version": "1.0.0"}
+
+@router.get("/debug/static")
+async def debug_static():
+    import os
+    from pathlib import Path
+
+    static_dir = Path(__file__).resolve().parent.parent.parent / "static"
+    result = {
+        "static_dir": str(static_dir),
+        "exists": static_dir.exists(),
+        "dist_exists": (static_dir / "dist").exists(),
+        "files": [],
+    }
+    if static_dir.exists():
+        for root, dirs, files in os.walk(static_dir):
+            for f in files:
+                full = os.path.join(root, f)
+                result["files"].append(
+                    {
+                        "path": os.path.relpath(full, static_dir),
+                        "size": os.path.getsize(full),
+                    }
+                )
+    return result
