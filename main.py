@@ -15,4 +15,8 @@ STATIC_DIR = Path(__file__).resolve().parent / "static"
 if not STATIC_DIR.exists():
     raise RuntimeError(f"Static directory not found: {STATIC_DIR}")
 
-app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+app.mount(
+    "/static",
+    StaticFiles(directory=STATIC_DIR, follow_symlink=True),
+    name="static",
+)
