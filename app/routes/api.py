@@ -186,3 +186,40 @@ async def debug_static():
                     }
                 )
     return result
+
+
+@router.get("/debug/routes")
+async def debug_routes(request: Request):
+    routes_info = []
+    for route in request.app.routes:
+        info = {
+            "type": type(route).__name__,
+            "path": getattr(route, "path", "N/A"),
+        }
+        if hasattr(route, "app"):
+            info["app_type"] = type(route.app).__name__
+            if hasattr(route.app, "directory"):
+                info["directory"] = str(route.app.directory)
+        if hasattr(route, "name"):
+            info["name"] = route.name
+        routes_info.append(info)
+    return {"routes": routes_info}
+
+
+@router.get("/debug/serve-css")
+async def debug_serve_css():
+    from pathlib import Path
+
+    from fastapi.responses import Response
+
+    css_path = (
+        Path(__file__).resolve().parent.parent.parent
+        / "static"
+        / "dist"
+        / "styles.css"
+    )
+    if css_path.exists():
+        return Response(
+            content=css_path.read_bytes(), media_type="text/css"
+        )
+    return {"error": "not found", "path": str(css_path)}
