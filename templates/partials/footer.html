@@ -4,10 +4,9 @@
   <div class="wrap">
     <div class="footer__grid">
       <section class="footer__col">
-        <a href="/#top" class="brand" id="footer-h">
-          <span class="brand__dot" aria-hidden="true"></span>
-          Sandlådan AB
-        </a>
+        {#- Plain column heading, not the wordmark: the fixed header already shows the wordmark,
+            and on a phone scrolled to the bottom the two would sit right on top of each other. -#}
+        <h3 class="footer__h" id="footer-h">Sandlådan AB</h3>
         <p class="body-sm muted footer__blurb">{{ copy.footer_blurb }}</p>
         {% if linkedin_url %}
           <a href="{{ linkedin_url }}" class="link-ext" rel="me noopener noreferrer" target="_blank">
