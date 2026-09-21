@@ -13,7 +13,7 @@ dependencies = [
     "python-multipart>=0.0.31",
     "httpx[http2]>=0.28",
     "python-dateutil>=2.9,<3.0",
-    "icalendar>=6.1,<7.0",
+    "icalendar>=6.1,<8.0",
     "aiofiles>=24.1",
     "pydantic-settings>=2.14.2",
 ]
