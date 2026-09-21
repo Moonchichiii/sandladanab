@@ -24,6 +24,7 @@ from app.content import (
     PRIVACY_UPDATED,
     SERVICES,
 )
+from app.services import form_token
 
 BASE_DIR = pathlib.Path(__file__).resolve().parent.parent.parent
 DIST_DIR = BASE_DIR / "static" / "dist"
@@ -181,6 +182,7 @@ async def index(request: Request):
         "about_image": ABOUT_IMAGE,
         "about_sizes": ABOUT_SIZES,
         "facts": _facts(),
+        "form_token": form_token.mint(),
         "lediga_text": settings.lediga_text,
         "status_url": (
             "/api/status"

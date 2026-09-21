@@ -30,5 +30,8 @@ CI runs the same plus CodeQL, OpenSSF Scorecard, dependency review and gitleaks 
 
 - Copy and image slots: `app/content.py`
 - Company facts (org.nr, owner, LinkedIn…): `.env` → `app/config.py` (empty = row hidden)
+- Form spam protection: honeypot + HMAC-signed timestamp (`app/services/form_token.py`).
+  Set `FORM_SECRET` in the production `.env` (`openssl rand -hex 32`); `FORM_MIN_SECONDS=3`,
+  `FORM_MAX_SECONDS=7200` are the defaults. Rate limit: `RATE_MAX` per `RATE_WINDOW` seconds per IP.
 - Photos: put originals in `assets-src/`, run `python scripts/render_images.py`
 - Design system (tokens, components, guidelines): the "Sandlådan Design System" artifact

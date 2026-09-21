@@ -57,6 +57,14 @@ class Settings(BaseSettings):
     rate_window: int = 60
     rate_max: int = 5
 
+    # ── Form spam protection (honeypot + signed timestamp) ──
+    # FORM_SECRET signs the hidden timestamp in the quote form. Set a long random
+    # string in production (e.g. `openssl rand -hex 32`); empty = a random secret
+    # per process, so tokens die on restart and visitors are asked to reload.
+    form_secret: str = ""
+    form_min_seconds: int = 3  # faster than this = bot (silently dropped)
+    form_max_seconds: int = 7200  # older than this = "reload and try again"
+
     # ── Calendar ─────────────────────────────────────
     calendar_mode: str = "ics"
     calendar_ics_url: str = ""

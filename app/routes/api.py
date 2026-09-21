@@ -11,6 +11,7 @@ from fastapi import (
 )
 from fastapi.responses import HTMLResponse
 
+from app.services import form_token
 from app.services.calendar import CalendarService
 from app.services.email import EmailService
 from app.services.rate_limit import RateLimiter
@@ -40,6 +41,13 @@ def _html(css: str, role: str, body: str, code: int = 200) -> HTMLResponse:
         f'<div class="notice notice--{css}" role="{role}">{body}</div>',
         status_code=code,
         headers=_NO_STORE,
+    )
+
+
+def _fake_success() -> HTMLResponse:
+    """What a bot sees: a plausible thank-you, no mail, no hint that it was caught."""
+    return _html(
+        "ok", "status", "<p><strong>Tack!</strong> Din förfrågan är mottagen.</p>"
     )
 
 
@@ -82,6 +90,7 @@ async def offert(
     telefon: Annotated[str, Form()],
     beskrivning: Annotated[str | None, Form()] = None,
     website: Annotated[str | None, Form()] = None,
+    ts: Annotated[str | None, Form()] = None,
     bild: UploadFile | None = None,
 ) -> HTMLResponse:
     ip = request.client.host if request.client else "unknown"
@@ -96,10 +105,24 @@ async def offert(
             429,
         )
 
-    # ── Honeypot ─────────────────────────────────
+    # ── Spam protection 1/2: honeypot ────────────
+    # A filled decoy field means a bot. It gets a convincing "thanks" and nothing
+    # is sent, so it has no reason to retry.
     if website:
+        return _fake_success()
+
+    # ── Spam protection 2/2: signed timestamp ────
+    # Rendered into the form by pages.py; see app/services/form_token.py.
+    verdict = form_token.verify(ts)
+    if verdict in ("missing", "fast"):
+        return _fake_success()
+    if verdict != "ok":  # expired or tampered: a human may sit behind this
         return _html(
-            "ok", "status", "<p><strong>Tack!</strong> Din förfrågan är mottagen.</p>"
+            "err",
+            "alert",
+            "<p><strong>Sidan har varit öppen länge.</strong> "
+            "Ladda om sidan och skicka igen.</p>",
+            422,
         )
 
     # ── Validation ───────────────────────────────

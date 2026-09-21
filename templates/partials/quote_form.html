@@ -15,11 +15,13 @@
       data-async
       data-target="#form-response"
     >
-      <!-- Honeypot -->
+      <!-- Spam protection 1/2: honeypot — bots fill it, people never see it -->
       <div class="visually-hidden" aria-hidden="true">
         <label for="website">Lämna detta fält tomt</label>
         <input id="website" type="text" name="website" tabindex="-1" autocomplete="off" />
       </div>
+      <!-- Spam protection 2/2: signed timestamp (app/services/form_token.py) — too fast or missing = bot -->
+      <input type="hidden" name="ts" value="{{ form_token }}" />
 
       <div class="field">
         <label class="form-label" for="namn">Namn <span class="req" aria-hidden="true">*</span></label>

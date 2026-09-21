@@ -3,8 +3,9 @@
 Sandlådan AB's website is a small FastAPI application with no accounts, no database and no
 third-party requests. It still takes security seriously: every response carries a strict
 Content-Security-Policy (no `unsafe-inline`), COOP/COEP/CORP, HSTS with preload, Subresource
-Integrity on its own assets, and uploads are validated by their bytes. The full list is tested
-in `tests/test_site.py`.
+Integrity on its own assets, uploads are validated by their bytes, and the quote form is
+protected by a honeypot, an HMAC-signed timestamp and a per-IP rate limit. The full list is
+tested in `tests/test_site.py`.
 
 ## Reporting a vulnerability
 

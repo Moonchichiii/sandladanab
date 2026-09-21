@@ -25,5 +25,8 @@ os.environ.update(
         "RATE_WINDOW": "60",
         "RATE_MAX": "5",  # test_offert_rate_limited counts on 5
         "HSTS_ENABLE": "false",
+        "FORM_SECRET": "test-secret-not-for-production",  # stable form tokens
+        "FORM_MIN_SECONDS": "3",  # the timing tests count on 3 s / 2 h
+        "FORM_MAX_SECONDS": "7200",
     }
 )
