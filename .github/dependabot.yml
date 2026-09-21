@@ -1,0 +1,44 @@
+version: 2
+updates:
+  # Python (uv.lock). If your GitHub plan does not know the "uv" ecosystem yet, change it to "pip".
+  - package-ecosystem: "uv"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "07:00"
+      timezone: "Europe/Stockholm"
+    open-pull-requests-limit: 10
+    groups:
+      python-minor-patch:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
+    labels: ["dependencies", "python"]
+
+  # JavaScript (bun.lock). Fallback if "bun" is not recognised: "npm".
+  - package-ecosystem: "bun"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "07:00"
+      timezone: "Europe/Stockholm"
+    open-pull-requests-limit: 5
+    groups:
+      js-minor-patch:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
+    labels: ["dependencies", "javascript"]
+
+  # The SHA-pinned actions above; Dependabot bumps the SHA and the version comment together.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "07:00"
+      timezone: "Europe/Stockholm"
+    groups:
+      actions:
+        patterns: ["*"]
+    labels: ["dependencies", "actions"]

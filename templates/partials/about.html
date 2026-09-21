@@ -1,0 +1,16 @@
+{% from "macros/picture.html" import picture with context %}
+
+<section class="section section--band" id="om" aria-labelledby="om-h">
+  <div class="wrap about">
+    <figure class="about__media">
+      {{ picture(about_image, about_sizes) }}
+    </figure>
+
+    <div class="about__body">
+      <p class="eyebrow">Om Sandlådan</p>
+      <h2 id="om-h" class="display-2">{{ copy.about_h2 }}</h2>
+      <p class="body">{{ copy.about_body }}</p>
+      {% include "partials/facts.html" %}
+    </div>
+  </div>
+</section>

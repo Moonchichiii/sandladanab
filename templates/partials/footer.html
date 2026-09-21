@@ -1,79 +1,58 @@
-{% from "macros/icons.html" import icon_phone %}
+{% from "macros/icons.html" import icon_phone, icon_external %}
 
-<footer class="footer" aria-labelledby="footer-heading">
-  <div class="container">
+<footer class="footer" aria-labelledby="footer-h">
+  <div class="wrap">
     <div class="footer__grid">
-      <!-- Brand -->
-      <section>
-        <h3 id="footer-heading" class="footer__h">Sandlådan AB</h3>
-        <p class="muted">
-          Professionella grävmaskinsjobb och anläggningsarbeten på
-          västkusten.
-        </p>
-        <p class="muted">Göteborg med omnejd</p>
+      <section class="footer__col">
+        <a href="/#top" class="brand" id="footer-h">
+          <span class="brand__dot" aria-hidden="true"></span>
+          Sandlådan AB
+        </a>
+        <p class="body-sm muted footer__blurb">{{ copy.footer_blurb }}</p>
+        {% if linkedin_url %}
+          <a href="{{ linkedin_url }}" class="link-ext" rel="me noopener noreferrer" target="_blank">
+            Sandlådan AB på LinkedIn {{ icon_external() }}<span class="visually-hidden"> (öppnas i nytt fönster)</span>
+          </a>
+        {% endif %}
       </section>
 
-      <!-- Quick Links -->
-      <nav aria-label="Snabblänkar">
+      <nav class="footer__col" aria-label="Snabblänkar">
         <h3 class="footer__h">Snabblänkar</h3>
         <ul class="footer__links">
-          <li>
-            <a href="#tjanster" class="link-underline">Våra tjänster</a>
-          </li>
-          <li>
-            <a href="#galleri" class="link-underline">Galleri</a>
-          </li>
-          <li>
-            <a href="#offert" class="link-underline">Begär offert</a>
-          </li>
+          {% for link in nav_links %}
+            <li><a href="{{ link.href }}">{{ link.label }}</a></li>
+          {% endfor %}
         </ul>
       </nav>
 
-      <!-- Contact -->
-      <section aria-labelledby="footer-contact">
-        <h3 id="footer-contact" class="footer__h">Kontakt</h3>
-        <ul class="footer__links">
-          <li>
-            <a
-              href="mailto:{{ public_email }}"
-              class="link-underline"
-              style="font-weight: 700"
-            >
-              {{ public_email }}
-            </a>
-          </li>
-          <li style="margin-top: 0.5rem">
-            <a
-              href="tel:{{ owner_phone }}"
-              class="btn btn--ghost btn--icon"
-              style="border-radius: 99px; padding: 0.4rem 1rem; font-size: 0.85rem"
-            >
-              {{ icon_phone(16) }}
+      <section class="footer__col" aria-labelledby="footer-kontakt">
+        <h3 class="footer__h" id="footer-kontakt">Kontakt</h3>
+        {% if show_phone %}
+          <p class="body-sm muted">{{ copy.footer_contact_phone }}</p>
+          <div class="stack">
+            <a href="tel:{{ owner_phone }}" class="btn btn--primary btn--sm" aria-label="Ring {{ owner_phone_display }}">
+              {{ icon_phone() }}
               <span>Ring direkt</span>
             </a>
-          </li>
-        </ul>
+            <a href="/#offert" class="btn btn--ghost btn--sm">Begär offert</a>
+          </div>
+        {% else %}
+          <p class="body-sm muted">{{ copy.footer_contact }}</p>
+          <div class="stack">
+            <a href="/#offert" class="btn btn--primary btn--sm">Begär offert</a>
+          </div>
+        {% endif %}
       </section>
     </div>
 
-    <!-- Bottom Bar -->
     <div class="footer__bar">
-      <p class="muted" style="margin-bottom: 0.75rem">
-        © {{ current_year }} Sandlådan AB – Alla rättigheter förbehållna
+      <p class="meta">
+        © {{ current_year }} Sandlådan AB{% if org_number %} · Org.nr {{ org_number }}{% endif %} · {{ seat }}
       </p>
-      <p class="muted" style="font-size: 0.9rem">
-        <a href="#">Integritet &amp; GDPR</a>
-        <span aria-hidden="true" style="opacity: 0.3; margin: 0 0.5rem">
-          |
-        </span>
-        Webbplats av
-        <a
-          href="https://nordiccodeworks.com"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Nordic Code Works
-        </a>
+      <p class="meta">
+        <a href="/integritet">Integritet &amp; GDPR</a>
+        · Webbplats av
+        <a href="https://nordiccodeworks.com" rel="noopener noreferrer">Nordic Code Works</a>
       </p>
     </div>
   </div>

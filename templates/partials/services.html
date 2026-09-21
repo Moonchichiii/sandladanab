@@ -1,12 +1,15 @@
-<section class="section" aria-labelledby="tjanster">
-  <div class="container">
-    <h2 id="tjanster">Tjänster</h2>
+<section class="section" id="tjanster" aria-labelledby="tjanster-h">
+  <div class="wrap">
+    <div class="section__head">
+      <p class="eyebrow">Tjänster</p>
+      <h2 id="tjanster-h" class="display-2">{{ copy.services_h2 }}</h2>
+    </div>
 
-    <ul class="cards" role="list">
+    <ul class="services" role="list">
       {% for s in services %}
-        <li class="card">
-          <h3>{{ s.title }}</h3>
-          <p class="muted">{{ s.description }}</p>
+        <li class="service">
+          <h3 class="service__title">{{ s.title }}</h3>
+          <p class="service__desc">{{ s.description }}</p>
         </li>
       {% endfor %}
     </ul>

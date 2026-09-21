@@ -1,56 +1,34 @@
 {% from "macros/icons.html" import icon_phone %}
+{% from "macros/picture.html" import picture with context %}
 
-<section class="hero">
-  <img
-    class="hero__bg"
-    srcset="
-      {{ url_for('static', path='assets/images/hero-excavator-640.webp') }} 640w,
-      {{ url_for('static', path='assets/images/hero-excavator-1280.webp') }} 1280w,
-      {{ url_for('static', path='assets/images/hero-excavator-1920.webp') }} 1920w"
-    sizes="100vw"
-    src="{{ url_for('static', path='assets/images/hero-excavator-1280.webp') }}"
-    alt="Grävmaskin i solnedgång"
-    width="1920"
-    height="1080"
-    loading="eager"
-    fetchpriority="high"
-    decoding="async"
-  />
+<section class="hero" aria-labelledby="hero-h">
+  <div class="wrap hero__grid">
+    <div class="hero__content">
+      <h1 id="hero-h" class="display-1">{{ copy.hero_h1 }}</h1>
+      <p class="lead">{{ copy.hero_lead }}</p>
 
-  <div class="hero__overlay"></div>
+      <div class="stack">
+        {% if show_phone %}
+          <a href="tel:{{ owner_phone }}" class="btn btn--primary" aria-label="Ring {{ owner_phone_display }}">
+            {{ icon_phone() }}
+            <span>Ring direkt</span>
+          </a>
+          <a href="#offert" class="btn btn--ghost">Begär offert</a>
+        {% else %}
+          <a href="#offert" class="btn btn--primary">Begär offert</a>
+          <a href="#galleri" class="btn btn--ghost">Se våra arbeten</a>
+        {% endif %}
+      </div>
 
-  <div class="container hero__content">
-    <h1>Anläggningsjobb när du behöver det.</h1>
-    <p class="lead">
-      Punktliga leveranser • Försäkrat arbete • Erfaren förare
-    </p>
-
-    <div class="stack">
-      <a
-        href="tel:{{ owner_phone }}"
-        class="btn btn--primary btn--icon"
-        aria-label="Ring {{ owner_phone }}"
-      >
-        {{ icon_phone(20) }}
-        <span>Ring direkt</span>
-      </a>
-      <a href="#offert" class="btn btn--ghost">Begär offert</a>
+      {#- Availability: rendered server-side. Only with the ICS calendar mode on does site.js refresh it from /api/status. -#}
+      <p class="status" id="status"{% if status_url %} data-status-url="{{ status_url }}"{% endif %} aria-live="polite">
+        <span class="status__dot status__dot--live" aria-hidden="true"></span>
+        <span>{{ lediga_text }}</span>
+      </p>
     </div>
 
-    <!-- Status pill — HTMX loads content on page load -->
-    <div
-      id="status"
-      class="pill"
-      hx-get="/api/status"
-      hx-trigger="load"
-      hx-swap="innerHTML"
-    >
-      <span class="pill__inner">
-        <span class="pill__dot" aria-hidden="true"></span>
-        <span class="pill__text" style="opacity: 0.8">
-          Kontrollerar tillgänglighet…
-        </span>
-      </span>
-    </div>
+    <figure class="hero__media">
+      {{ picture(hero_image, hero_sizes, priority=true) }}
+    </figure>
   </div>
 </section>

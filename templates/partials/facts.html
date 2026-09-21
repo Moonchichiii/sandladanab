@@ -1,0 +1,16 @@
+{% from "macros/icons.html" import icon_external %}
+{#- Company facts as a hairline definition list. Rows with no value are not rendered (pages.py builds `facts`). -#}
+<dl class="facts">
+  {% for f in facts %}
+    <div class="facts__row">
+      <dt>{{ f.label }}</dt>
+      <dd>
+        {% if f.href %}
+          <a href="{{ f.href }}"{% if f.external %} class="link-ext" rel="me noopener noreferrer" target="_blank"{% endif %}>{{ f.value }}{% if f.external %} {{ icon_external() }}<span class="visually-hidden"> (öppnas i nytt fönster)</span>{% endif %}</a>
+        {% else %}
+          {{ f.value }}
+        {% endif %}
+      </dd>
+    </div>
+  {% endfor %}
+</dl>

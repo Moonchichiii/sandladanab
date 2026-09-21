@@ -1,51 +1,24 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="sv">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sandlådan AB – Kommer snart</title>
-    <meta name="robots" content="noindex, nofollow">
-    <style>
-        body {
-            background-color: #0E1113;
-            color: #ffffff;
-            font-family: system-ui, -apple-system, sans-serif;
-            height: 100vh;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 1rem;
-        }
-        img {
-            max-width: 100%;
-            height: auto;
-            max-height: 70vh; /* Keeps image from being too tall */
-            border-radius: 8px;
-            margin-bottom: 2rem;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-        }
-        h1 {
-            font-size: clamp(1.5rem, 5vw, 2.5rem);
-            margin: 0 0 1rem;
-            line-height: 1.2;
-        }
-        p {
-            font-size: 1.125rem;
-            color: #adb5bd; /* Muted gray */
-            margin: 0;
-        }
-    </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sandlådan AB – Kommer snart</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#000000">
+  <style nonce="{{ csp_nonce(request) }}">
+    html { color-scheme: dark; }
+    body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 24px; background: #000; color: #fff; font-family: system-ui, -apple-system, sans-serif; text-align: center; }
+    img { max-width: 100%; height: auto; max-height: 60vh; border-radius: 12px; box-shadow: inset 0 0 0 1px #ffffff14; margin: 0 auto 32px; }
+    h1 { font-size: clamp(1.75rem, 5vw, 2.5rem); line-height: 1.1; letter-spacing: -0.02em; margin: 0 0 12px; }
+    p { margin: 0; font-size: 1.125rem; color: #a8a29e; }
+  </style>
 </head>
 <body>
-    <div>
-        <img src="/static/assets/images/maintenance.avif" alt="Under arbete">
-
-        <h1>Sidan är under rekonstruktion</h1>
-        <h2>Sandlådan AB kommer snart tillbaka</h2>
-        <p>Vi återkommer strax!</p>
-    </div>
+  <div>
+    <img src="/static/assets/images/Maintenance.avif" alt="" width="1024" height="683">
+    <h1>Sandlådan AB kommer snart tillbaka.</h1>
+    <p>Sidan är under arbete – vi återkommer strax.</p>
+  </div>
 </body>
 </html>

@@ -78,5 +78,5 @@ class CalendarService:
 
         if free:
             weeks_str = str(free[0]) if len(free) == 1 else f"{free[0]}–{free[1]}"
-            return f"Lediga v. {weeks_str} • Snabbt platsbesök i Göteborg med omnejd"
+            return f"Lediga v. {weeks_str} · Snabbt platsbesök i Göteborg med omnejd"
         return settings.lediga_text

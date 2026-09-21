@@ -1,15 +1,15 @@
-{% macro icon_phone(size=20) -%}
-<svg
-  xmlns="http://www.w3.org/2000/svg"
-  width="{{ size }}"
-  height="{{ size }}"
-  viewBox="0 0 24 24"
-  fill="currentColor"
-  aria-hidden="true"
-  focusable="false"
->
-  <path
-    d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24c1.12.37 2.33.57 3.58.57a1 1 0 011 1V20a1 1 0 01-1 1C10.3 21 3 13.7 3 4a1 1 0 011-1h3.5a1 1 0 011 1c0 1.25.2 2.46.57 3.58a1 1 0 01-.25 1.01l-2.2 2.2z"
-  />
+{#- Inline SVG glyphs. All take currentColor; sized by the .icon class. No emoji anywhere on the site. -#}
+{% macro icon_phone(class="icon") -%}
+<svg class="{{ class }}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24c1.12.37 2.33.57 3.58.57a1 1 0 011 1V20a1 1 0 01-1 1C10.3 21 3 13.7 3 4a1 1 0 011-1h3.5a1 1 0 011 1c0 1.25.2 2.46.57 3.58a1 1 0 01-.25 1.01l-2.2 2.2z"/></svg>
+{%- endmacro %}
+
+{% macro icon_external(class="icon icon--sm") -%}
+<svg class="{{ class }}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M7 17 17 7M9 7h8v8"/></svg>
+{%- endmacro %}
+
+{% macro icon_menu() -%}
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+  <g class="line--open"><path class="line" d="M7 10h18"/><path class="line" d="M7 16h18"/><path class="line" d="M7 22h18"/></g>
+  <g class="line--close"><path class="line" d="M9 9l14 14"/><path class="line" d="M23 9 9 23"/></g>
 </svg>
 {%- endmacro %}

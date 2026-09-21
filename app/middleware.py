@@ -45,15 +45,18 @@ def register_middleware(app: FastAPI) -> None:
         response: Response = await call_next(request)
         nonce = getattr(request.state, "csp_nonce", "")
 
-        script_src = f"'self' 'nonce-{nonce}'" if nonce else "'self'"
+        nonce_src = f"'self' 'nonce-{nonce}'" if nonce else "'self'"
         csp = "; ".join(
             [
                 "default-src 'self'",
-                "img-src 'self' data: blob:",
-                "style-src 'self' 'unsafe-inline'",
-                f"script-src {script_src}",
-                "font-src 'self' data:",
+                "img-src 'self'",
+                # no 'unsafe-inline': templates carry no style attributes
+                f"style-src {nonce_src}",
+                f"script-src {nonce_src}",
+                "font-src 'self'",
                 "connect-src 'self'",
+                "manifest-src 'self'",
+                "object-src 'none'",
                 "form-action 'self'",
                 "base-uri 'self'",
                 "frame-ancestors 'none'",
@@ -67,6 +70,10 @@ def register_middleware(app: FastAPI) -> None:
             "X-Content-Type-Options": "nosniff",
             "X-Frame-Options": "DENY",
             "Permissions-Policy": ("geolocation=(), microphone=(), camera=()"),
+            "Cross-Origin-Opener-Policy": "same-origin",
+            "Cross-Origin-Resource-Policy": "same-origin",
+            # safe: every resource is same-origin (no third-party embeds)
+            "Cross-Origin-Embedder-Policy": "require-corp",
         }
         if settings.hsts_enable:
             headers["Strict-Transport-Security"] = (

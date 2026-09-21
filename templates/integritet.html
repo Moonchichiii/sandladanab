@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Integritet & GDPR – Sandlådan AB{% endblock %}
+{% block og_title %}Integritet & GDPR – Sandlådan AB{% endblock %}
+{% block description %}Hur Sandlådan AB hanterar de uppgifter du lämnar via offertformuläret: vad vi samlar in, varför, hur länge och vilka rättigheter du har.{% endblock %}
+
+{% block content %}
+<section class="section section--band" aria-labelledby="integritet-h">
+  <div class="wrap">
+    <div class="section__head">
+      <p class="eyebrow">Integritet &amp; GDPR</p>
+      <h1 id="integritet-h" class="display-2">Så hanterar vi dina uppgifter.</h1>
+      <p class="lead">Kort version: vi använder det du skriver i formuläret för att ringa upp dig om jobbet. Inget annat.</p>
+    </div>
+
+    <article class="prose">
+      <h2>Personuppgiftsansvarig</h2>
+      <p><strong>Sandlådan AB</strong>{% if org_number %}, org.nr {{ org_number }}{% endif %}{% if postal_address %}, {{ postal_address }}{% else %}, {{ seat }}{% endif %}. Du når oss {% if show_phone %}på telefon <a href="tel:{{ owner_phone }}">{{ owner_phone_display }}</a> eller {% endif %}via <a href="/#offert">formuläret</a>.</p>
+
+      <h2>Vilka uppgifter vi samlar in</h2>
+      <p>Bara det du själv lämnar i offertformuläret: namn, telefonnummer, din beskrivning av jobbet och en eventuell bild. Vi sparar inte din IP-adress i något register; den används enbart tillfälligt för att begränsa antalet förfrågningar per minut (skydd mot skräppost) och loggas inte tillsammans med dina uppgifter.</p>
+
+      <h2>Varför och med vilken rättslig grund</h2>
+      <p>För att kunna återkomma med offert eller boka ett platsbesök, det vill säga för att vidta åtgärder på din begäran innan ett avtal ingås (GDPR art. 6.1 b). Vi använder inte uppgifterna för marknadsföring och skickar inga nyhetsbrev.</p>
+
+      <h2>Hur länge vi sparar dem</h2>
+      <p>Din förfrågan skickas som e-post till oss och ligger i vår inkorg tills ärendet är avslutat. Blir det inget uppdrag raderas den inom tolv månader. Blir det ett uppdrag sparas uppgifterna som en del av bokföringsunderlaget så länge bokföringslagen kräver (sju år).</p>
+
+      <h2>Vem som får se dem</h2>
+      <p>Bara vi på Sandlådan AB och den e-postleverantör som förmedlar meddelandet. Vi säljer, hyr ut eller delar inte uppgifter med tredje part.</p>
+
+      <h2>Kakor och spårning</h2>
+      <p>Webbplatsen använder inga kakor, ingen analys- eller annonsspårning och laddar inga skript, typsnitt eller bilder från tredje part. Det finns därför ingen kakbanner – det finns inget att godkänna.</p>
+
+      <h2>Säkerhet</h2>
+      <p>Sidan levereras över HTTPS med strikta säkerhetsrubriker (Content-Security-Policy, HSTS, inga tredjepartskällor). Bifogade bilder kontrolleras mot tillåtna filtyper och storlek innan de vidarebefordras.</p>
+
+      <h2>Dina rättigheter</h2>
+      <ul>
+        <li>Få veta vilka uppgifter vi har om dig (registerutdrag).</li>
+        <li>Få felaktiga uppgifter rättade.</li>
+        <li>Få uppgifterna raderade när de inte längre behövs för ändamålet ovan.</li>
+        <li>Klaga till Integritetsskyddsmyndigheten (imy.se) om du anser att vi hanterar dina uppgifter fel.</li>
+      </ul>
+      <p>{% if show_phone %}Ring eller skriv{% else %}Skriv{% endif %} via formuläret så ordnar vi det.</p>
+
+      <p class="meta">Senast ändrad {{ privacy_updated }}.</p>
+    </article>
+  </div>
+</section>
+{% endblock %}

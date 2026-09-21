@@ -41,9 +41,7 @@ def create_app() -> FastAPI:
                 list(DIST_DIR.iterdir()) if DIST_DIR.is_dir() else "NO DIR",
             )
             return Response("Not found", status_code=404)
-        media = _MIME.get(
-            filepath.suffix.lower(), "application/octet-stream"
-        )
+        media = _MIME.get(filepath.suffix.lower(), "application/octet-stream")
         return Response(
             content=filepath.read_bytes(),
             media_type=media,

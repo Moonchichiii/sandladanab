@@ -1,4 +1,4 @@
-{% from "macros/icons.html" import icon_phone %}
+{% from "macros/icons.html" import icon_phone, icon_menu %}
 <!doctype html>
 <html lang="sv">
   <head>
@@ -9,36 +9,35 @@
     />
 
     <!-- PWA / Theming -->
-    <meta name="theme-color" content="#0E1113" />
+    <meta name="theme-color" content="#000000" />
     <meta name="application-name" content="Sandlådan AB" />
     <meta name="apple-mobile-web-app-title" content="Sandlådan AB" />
     <meta name="color-scheme" content="dark" />
 
     <title>
-      {% block title %}Sandlådan AB – Grävmaskinsjobb på västkusten{% endblock %}
+      {% block title %}Sandlådan AB – Grävmaskinsjobb och anläggning i Göteborg{% endblock %}
     </title>
     <meta
       name="description"
-      content="Sandlådan AB utför grävmaskinsjobb på konsultbasis i Göteborg med omnejd. Snabb offert och punktlig leverans."
+      content="{% block description %}Sandlådan AB utför grävmaskinsjobb på konsultbasis i Göteborg med omnejd: schakt, dränering, grundläggning och ledningsgravar. Ring eller begär offert.{% endblock %}"
     />
-    <link
-      rel="canonical"
-      href="{{ (BASE_URL or (request.url.scheme ~ '://' ~ request.url.netloc)) ~ '/' }}"
-    />
+    <link rel="canonical" href="{{ canonical_url }}" />
+    {% block robots %}{% endblock %}
 
-    <!-- Preload: LCP Hero Image -->
-    <link
-      rel="preload"
-      as="image"
-      type="image/webp"
-      imagesrcset="
-        {{ url_for('static', path='assets/images/hero-excavator-640.webp') }} 640w,
-        {{ url_for('static', path='assets/images/hero-excavator-1280.webp') }} 1280w,
-        {{ url_for('static', path='assets/images/hero-excavator-1920.webp') }} 1920w"
-      imagesizes="100vw"
-      href="{{ url_for('static', path='assets/images/hero-excavator-1280.webp') }}"
-      fetchpriority="high"
-    />
+    <!-- Link previews (LinkedIn, Slack, Messenger): the same facts as the page -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Sandlådan AB" />
+    <meta property="og:locale" content="sv_SE" />
+    <meta property="og:url" content="{{ canonical_url }}" />
+    <meta property="og:title" content="{% block og_title %}Sandlådan AB – Grävmaskinsjobb och anläggning i Göteborg{% endblock %}" />
+    <meta property="og:description" content="{{ self.description() }}" />
+    <meta property="og:image" content="{{ og_image }}" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="{{ hero_image.alt if hero_image else 'Sandlådan AB' }}" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    {% block preload %}{% endblock %}
 
     <!-- Preload: Fonts -->
     <link
@@ -57,22 +56,20 @@
     />
 
     <!-- Styles (Tailwind 4.1 build output) -->
-    <link rel="stylesheet" href="/dist/styles.css" />
+    <link rel="stylesheet" href="{{ css.url }}"{% if css.integrity %} integrity="{{ css.integrity }}"{% endif %} />
 
-    <!-- Favicon -->
-    <link
-      rel="icon"
-      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23FF8C00'/><text x='50' y='75' font-size='70' font-weight='bold' text-anchor='middle' fill='%23FFF' font-family='sans-serif'>S</text></svg>"
-    />
+    <!-- Icons -->
+    <link rel="icon" href="{{ url_for('static', path='assets/brand/favicon.svg') }}" type="image/svg+xml" />
+    <link rel="icon" href="{{ url_for('static', path='assets/brand/icon-32.png') }}" sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href="{{ url_for('static', path='assets/brand/icon-192.png') }}" />
     <link rel="manifest" href="/site.webmanifest" />
 
+    {% if schema_json %}
     <!-- Schema.org -->
-    <script
-      type="application/ld+json"
-      nonce="{{ csp_nonce(request) }}"
-    >
+    <script type="application/ld+json" nonce="{{ csp_nonce(request) }}">
       {{ schema_json | safe }}
     </script>
+    {% endif %}
   </head>
 
   <body>
@@ -81,52 +78,40 @@
 
     {# ── Header ──────────────────────────────────── #}
     <header class="header">
-      <div class="container header__inner">
-        <a href="#top" class="brand" aria-label="Till toppen – Sandlådan AB">
+      <div class="wrap header__inner">
+        <a href="/#top" class="brand" aria-label="Till toppen – Sandlådan AB">
           <span class="brand__dot" aria-hidden="true"></span>
-          SANDLÅDAN AB
+          Sandlådan AB
         </a>
 
-        <!-- Desktop Nav -->
         <nav class="nav-desktop" aria-label="Huvudmeny">
           {% for link in nav_links %}
-            <a href="{{ link.href }}" class="nav-link">
-              {{ link.label }}
-            </a>
+            <a href="{{ link.href }}" class="nav-link">{{ link.label }}</a>
           {% endfor %}
-          <a
-            href="tel:{{ owner_phone }}"
-            class="btn btn--primary btn--icon header__cta"
-            aria-label="Ring {{ owner_phone }}"
-          >
-            {{ icon_phone(18) }}
-            <span>Ring direkt</span>
-          </a>
+          {% if show_phone %}
+            <a href="tel:{{ owner_phone }}" class="btn btn--primary btn--sm" aria-label="Ring {{ owner_phone_display }}">
+              {{ icon_phone() }}
+              <span>Ring direkt</span>
+            </a>
+          {% else %}
+            <a href="/#offert" class="btn btn--primary btn--sm">Begär offert</a>
+          {% endif %}
         </nav>
 
-        <!-- Mobile Toggle -->
         <button
           id="menu-btn"
           class="menu-toggle"
+          type="button"
           aria-label="Öppna meny"
           aria-expanded="false"
-          type="button"
+          aria-controls="mobile-menu"
         >
-          <label class="hamburger" aria-hidden="true">
-            <input id="menu-check" type="checkbox" />
-            <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false">
-              <path
-                class="line line-top-bottom"
-                d="M27 10 13 10C10.8 10 9 8.2 9 6 9 3.5 10.8 2 13 2 15.2 2 17 3.8 17 6L17 26C17 28.2 18.8 30 21 30 23.2 30 25 28.2 25 26 25 23.8 23.2 22 21 22L7 22"
-              ></path>
-              <path class="line" d="M7 16 27 16"></path>
-            </svg>
-          </label>
+          {{ icon_menu() }}
         </button>
       </div>
     </header>
 
-    {# ── Mobile Nav Overlay ──────────────────────── #}
+    {# ── Mobile menu sheet ───────────────────────── #}
     <nav
       id="mobile-menu"
       class="nav-mobile"
@@ -137,40 +122,24 @@
       {% for link in nav_links %}
         <a href="{{ link.href }}">{{ link.label }}</a>
       {% endfor %}
-      <a
-        href="tel:{{ owner_phone }}"
-        class="btn btn--primary btn--icon header__cta"
-        aria-label="Ring direkt"
-      >
-        {{ icon_phone(18) }}
-        <span>Ring direkt</span>
-      </a>
+      {% if show_phone %}
+        <a href="tel:{{ owner_phone }}" class="btn btn--primary" aria-label="Ring {{ owner_phone_display }}">
+          {{ icon_phone() }}
+          <span>Ring direkt</span>
+        </a>
+      {% else %}
+        <a href="/#offert" class="btn btn--primary">Begär offert</a>
+      {% endif %}
     </nav>
 
-    {# ── Page Content ────────────────────────────── #}
-    {% block hero %}{% endblock %}
-
-    <main id="main" class="container page-pad">
+    {# ── Page content ────────────────────────────── #}
+    <main id="main">
       {% block content %}{% endblock %}
     </main>
 
     {% include "partials/footer.html" %}
 
-    {# ── Scripts ─────────────────────────────────── #}
-    <script
-      src="{{ url_for('static', path='vendor/htmx.min.js') }}"
-      defer
-      nonce="{{ csp_nonce(request) }}"
-    ></script>
-    <script
-      src="/dist/file-input.js"
-      defer
-      nonce="{{ csp_nonce(request) }}"
-    ></script>
-    <script
-      src="/dist/menu.js"
-      defer
-      nonce="{{ csp_nonce(request) }}"
-    ></script>
+    {# ── Scripts: one file, no framework ─────────── #}
+    <script src="{{ js.url }}"{% if js.integrity %} integrity="{{ js.integrity }}"{% endif %} defer nonce="{{ csp_nonce(request) }}"></script>
   </body>
 </html>

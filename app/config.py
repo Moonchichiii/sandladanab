@@ -24,8 +24,25 @@ class Settings(BaseSettings):
     disable_trusted_host: bool = False
 
     # ── Contact ──────────────────────────────────────
-    owner_phone: str = "+46XXXXXXXX"
+    # 2026-09-21: the company phone is not published for now. SHOW_PHONE=true brings
+    # back every "Ring direkt" button, the Telefon fact and schema.org telephone.
+    show_phone: bool = False
+    owner_phone: str = ""  # E.164, used in tel: links when show_phone is on
+    owner_phone_display: str = (
+        ""  # how it is printed ("070-123 45 67"); falls back to owner_phone
+    )
+    # NOT rendered anywhere (decision 2026-09-21); only the mail_from fallback
     public_email: str = "info@sandladan.se"
+
+    # ── Verifiability (empty = the row is not rendered) ──
+    org_number: str = ""  # "5XXXXX-XXXX" as registered at Bolagsverket
+    seat: str = "Göteborg"  # säte / municipality
+    postal_address: str = ""  # optional; only shown on /integritet if set
+    owner_name: str = ""  # "Jeffery Efternamn"
+    owner_title: str = (
+        ""  # exactly as registered: e.g. "Ägare och grävmaskinist" or "VD"
+    )
+    linkedin_url: str = ""  # https://www.linkedin.com/company/sandladan-ab
 
     # ── SMTP ─────────────────────────────────────────
     smtp_host: str = ""
@@ -47,15 +64,12 @@ class Settings(BaseSettings):
     availability_weeks_ahead: int = 6
     status_cache_ttl: int = 1800
     lediga_text: str = (
-        "Tillgänglig för uppdrag \u2022 Snabbt platsbesök i Göteborg med omnejd"
+        "Tillgänglig för uppdrag \u00b7 Snabbt platsbesök i Göteborg med omnejd"
     )
 
     # ── Google Calendar (optional) ───────────────────
     gcal_service_account_json_path: str = ""
     gcal_calendar_id: str = ""
-
-    # ── Cloudinary ───────────────────────────────────
-    cloudinary_cloud: str = ""  # e.g. "dxxxxxx"
 
     # ── Parsed properties ────────────────────────────
 
@@ -90,6 +104,14 @@ class Settings(BaseSettings):
                 origin = f"https://{origin}"
             result.append(origin)
         return result
+
+    @property
+    def phone_display(self) -> str:
+        return self.owner_phone_display or self.owner_phone
+
+    @property
+    def phone_public(self) -> bool:
+        return bool(self.show_phone and self.owner_phone)
 
     @property
     def effective_mail_from(self) -> str:

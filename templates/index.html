@@ -1,11 +1,23 @@
 {% extends "base.html" %}
 
-{% block hero %}
-  {% include "partials/hero.html" %}
+{% block preload %}
+  {#- LCP: the hero photo. AVIF set; browsers without AVIF skip a type-mismatched preload and fetch the WebP from <picture>. -#}
+  {% set base = url_for('static', path='assets/images/' ~ hero_image.file) %}
+  <link
+    rel="preload"
+    as="image"
+    type="image/avif"
+    href="{{ base }}-{{ hero_image.widths[0] }}.avif"
+    imagesrcset="{% for w in hero_image.widths %}{{ base }}-{{ w }}.avif {{ w }}w{{ ', ' if not loop.last }}{% endfor %}"
+    imagesizes="{{ hero_sizes }}"
+    fetchpriority="high"
+  />
 {% endblock %}
 
 {% block content %}
+  {% include "partials/hero.html" %}
   {% include "partials/services.html" %}
   {% include "partials/gallery.html" %}
+  {% include "partials/about.html" %}
   {% include "partials/quote_form.html" %}
 {% endblock %}

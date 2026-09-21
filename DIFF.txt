@@ -1,0 +1,120 @@
+Machine diff: v2 tree vs sandladanab-20260921-1311.zip (sha256 per file; caches and .env excluded)
+
+ADDED (68 files, DIFF.txt included)
+  + .github/dependabot.yml
+  + .github/workflows/ci.yml
+  + .github/workflows/codeql.yml
+  + .github/workflows/dependency-review.yml
+  + .github/workflows/scorecard.yml
+  + LEVERANS-v2-editorial.md
+  + SECURITY.md
+  + assets-src/galleri-avloppsror.jpg
+  + assets-src/galleri-isolering.jpg
+  + assets-src/galleri-kabelror.jpg
+  + assets-src/galleri-maskinstyrning.jpg
+  + assets-src/hero-rorlaggning.jpg
+  + assets-src/om-hytten.jpg
+  + bunfig.toml
+  + scripts/render_images.py
+  + static/assets/brand/favicon.svg
+  + static/assets/brand/icon-192.png
+  + static/assets/brand/icon-32.png
+  + static/assets/brand/icon-512.png
+  + static/assets/brand/og-image.jpg
+  + static/assets/images/galleri-avloppsror-<w>.avif  (3 files)
+  + static/assets/images/galleri-avloppsror-<w>.webp  (3 files)
+  + static/assets/images/galleri-isolering-<w>.avif  (3 files)
+  + static/assets/images/galleri-isolering-<w>.webp  (3 files)
+  + static/assets/images/galleri-kabelror-<w>.avif  (3 files)
+  + static/assets/images/galleri-kabelror-<w>.webp  (3 files)
+  + static/assets/images/galleri-maskinstyrning-<w>.avif  (3 files)
+  + static/assets/images/galleri-maskinstyrning-<w>.webp  (3 files)
+  + static/assets/images/hero-rorlaggning-<w>.avif  (3 files)
+  + static/assets/images/hero-rorlaggning-<w>.webp  (3 files)
+  + static/assets/images/om-hytten-<w>.avif  (3 files)
+  + static/assets/images/om-hytten-<w>.webp  (3 files)
+  + static/dist/site.js
+  + static/dist/styles.css
+  + static/js/site.js
+  + templates/integritet.html
+  + templates/macros/picture.html
+  + templates/partials/about.html
+  + templates/partials/facts.html
+  + tests/conftest.py
+  + tests/test_render_images.py
+  + tests/test_repo_policy.py
+  + tests/test_site.py
+  + DIFF.txt
+
+MODIFIED (24 files)
+  ~ .gitignore
+  ~ README.md
+  ~ app/__init__.py
+  ~ app/config.py
+  ~ app/content.py
+  ~ app/middleware.py
+  ~ app/routes/api.py
+  ~ app/routes/pages.py
+  ~ app/services/calendar.py
+  ~ main.py
+  ~ package.json
+  ~ pyproject.toml
+  ~ static/css/app.css
+  ~ static/site.webmanifest
+  ~ templates/base.html
+  ~ templates/index.html
+  ~ templates/macros/icons.html
+  ~ templates/maintenance.html
+  ~ templates/partials/footer.html
+  ~ templates/partials/gallery.html
+  ~ templates/partials/hero.html
+  ~ templates/partials/quote_form.html
+  ~ templates/partials/services.html
+  ~ uv.lock
+
+DELETED (39 files)
+  - app/services/cloudinary.py
+  - static/assets/images/gallery-1-320.webp
+  - static/assets/images/gallery-1-480.webp
+  - static/assets/images/gallery-1-640.webp
+  - static/assets/images/gallery-1-768.webp
+  - static/assets/images/gallery-2-320.webp
+  - static/assets/images/gallery-2-480.webp
+  - static/assets/images/gallery-2-640.webp
+  - static/assets/images/gallery-2-768.webp
+  - static/assets/images/gallery-3-320.webp
+  - static/assets/images/gallery-3-480.webp
+  - static/assets/images/gallery-3-640.webp
+  - static/assets/images/gallery-3-768.webp
+  - static/assets/images/gallery-4-320.webp
+  - static/assets/images/gallery-4-480.webp
+  - static/assets/images/gallery-4-640.webp
+  - static/assets/images/gallery-4-768.webp
+  - static/assets/images/gallery-5-320.webp
+  - static/assets/images/gallery-5-480.webp
+  - static/assets/images/gallery-5-640.webp
+  - static/assets/images/gallery-5-768.webp
+  - static/assets/images/gallery-6-320.webp
+  - static/assets/images/gallery-6-480.webp
+  - static/assets/images/gallery-6-640.webp
+  - static/assets/images/gallery-6-768.webp
+  - static/assets/images/gallery-<w>.webp  (6 files)
+  - static/assets/images/hero-excavator-<w>.webp  (3 files)
+  - static/assets/images/hero-excavator.webp
+  - static/js/file-input.js
+  - static/js/menu.js
+  - static/vendor/htmx.min.js
+  - templates/partials/header.html
+
+UNCHANGED (11 files)
+  = .vscode/settings.json
+  = LICENSE
+  = app/routes/__init__.py
+  = app/services/__init__.py
+  = app/services/email.py
+  = app/services/rate_limit.py
+  = bun.lock
+  = robots.txt
+  = static/assets/fonts/Author-Variable.woff2
+  = static/assets/fonts/Satoshi-Variable.woff2
+  = static/assets/images/Maintenance.avif

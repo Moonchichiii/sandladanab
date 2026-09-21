@@ -1,0 +1,22 @@
+{#- Responsive <picture> from an image record in app/content.py:
+    {"file": "hero-rorlaggning", "widths": [768, 1280, 1920], "ratio": [3, 2], "alt": "..."}.
+    AVIF first, WebP fallback; width/height from the largest rendition so CLS stays 0. -#}
+{% macro picture(img, sizes, loading="lazy", priority=false) -%}
+{%- set base = url_for('static', path='assets/images/' ~ img.file) -%}
+{%- set maxw = img.widths | max -%}
+{%- set maxh = (maxw * img.ratio[1] / img.ratio[0]) | round | int -%}
+<picture>
+  <source type="image/avif" sizes="{{ sizes }}" srcset="{% for w in img.widths %}{{ base }}-{{ w }}.avif {{ w }}w{{ ', ' if not loop.last }}{% endfor %}">
+  <img
+    src="{{ base }}-{{ img.widths[0] }}.webp"
+    srcset="{% for w in img.widths %}{{ base }}-{{ w }}.webp {{ w }}w{{ ', ' if not loop.last }}{% endfor %}"
+    sizes="{{ sizes }}"
+    width="{{ maxw }}"
+    height="{{ maxh }}"
+    alt="{{ img.alt }}"
+    loading="{{ 'eager' if priority else loading }}"
+    decoding="async"
+    {%- if priority %} fetchpriority="high"{% endif %}
+  >
+</picture>
+{%- endmacro %}

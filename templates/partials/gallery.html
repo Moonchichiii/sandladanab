@@ -1,35 +1,20 @@
-<section id="galleri" class="section" aria-labelledby="galleri-titel">
-  <div class="container">
-    <div class="text-center" style="margin-bottom: 3rem">
-      <h2 id="galleri-titel">Galleri</h2>
-      <p class="muted">
-        Se exempel på vårt arbete – från grundläggning till färdiga
-        anläggningsprojekt på västkusten.
-      </p>
+{% from "macros/picture.html" import picture with context %}
+
+<section class="section" id="galleri" aria-labelledby="galleri-h">
+  <div class="wrap">
+    <div class="section__head">
+      <p class="eyebrow">Galleri</p>
+      <h2 id="galleri-h" class="display-2">{{ copy.gallery_h2 }}</h2>
+      <p class="lead">{{ copy.gallery_lead }}</p>
     </div>
 
     <ul class="gallery" role="list">
       {% for item in gallery_items %}
-        <li class="gallery__item">
+        <li class="gallery__item{% if item.slot != 'square' %} gallery__item--{{ item.slot }}{% endif %}">
           <figure class="gallery__figure">
-            <img
-              class="gallery__img"
-              src="{{ url_for('static', path='assets/images/gallery-' ~ item.id ~ '-640.webp') }}"
-              srcset="
-                {{ url_for('static', path='assets/images/gallery-' ~ item.id ~ '-320.webp') }} 320w,
-                {{ url_for('static', path='assets/images/gallery-' ~ item.id ~ '-480.webp') }} 480w,
-                {{ url_for('static', path='assets/images/gallery-' ~ item.id ~ '-640.webp') }} 640w"
-              sizes="(min-width: 48rem) 33vw, calc(50vw - 1.5rem)"
-              alt="{{ item.name }}"
-              width="640"
-              height="640"
-              loading="lazy"
-              decoding="async"
-            />
-            <figcaption class="gallery__caption">
-              {{ item.name }}
-            </figcaption>
+            {{ picture(item, gallery_sizes[item.slot]) }}
           </figure>
+          <p class="gallery__caption">{{ item.caption }}</p>
         </li>
       {% endfor %}
     </ul>
